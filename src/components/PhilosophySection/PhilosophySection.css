@@ -1,0 +1,82 @@
+/* Güncellenmiş Hali */
+.philosophy-section {
+  width: 1500px;
+  margin: 0 auto;
+  padding: 150px 0;
+  color: var(--text-light, #3a4a41);
+  font-family: sans-serif;
+
+  /* --- YENİ EKLENEN ARKA PLAN AYARLARI --- */
+
+  /* Resim yüklenemezse görünecek yedek arka plan rengi */
+  background-color: #dacfcf; 
+
+  /* 1. Arka plan resminin yolunu belirtin */
+  background-image: url('/arkaplan2.png'); /* YOLU AYARLAMAYI UNUTMAYIN */
+
+  /* 2. Resmin tüm alanı kaplamasını sağlayın */
+  background-size: cover;
+
+  /* 3. Resmin ortalanmasını sağlayın */
+  background-position: center;
+
+  /* 4. Resmin tekrarlanmasını engelleyin */
+  background-repeat: no-repeat;
+  
+  /* 5. (Öneri) Sayfa kaydıkça resmin sabit kalması için */
+  background-attachment: fixed;
+}
+
+.heading-container {
+  position: relative;
+  margin-bottom: 200px;
+}
+
+.main-heading {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -2px;
+  text-align: right;
+  padding-right: 30%; /* Optional: tweak for your preferred offset */
+}
+
+
+.we-word-overlay {
+  position: absolute;
+  /* DEĞİŞİKLİK BURADA: 'top' değeri, animasyonun başlangıçtaki
+     negatif translateY'ini (-100%) tam olarak dengelemek için güncellendi.
+     Bu, kelimenin dikey olarak 1. satır hizasında başlamasını sağlar. */
+  top: 1.4em; 
+  left: 33.33%;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin: 0;
+  will-change: transform;
+  margin-left: 8em;
+  color: black;
+  
+}
+
+.body-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.philosophy-title {
+  font-size: 0.9rem;
+  font-weight: normal;
+  color: #3a4a41;
+}
+
+.philosophy-text {
+  font-size: 1.25rem;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0;
+}

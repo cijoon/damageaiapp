@@ -1,0 +1,83 @@
+// DOSYA ADI: src/components/CaseStudies/CaseStudies.css
+
+/* 1. Kaydırma Alanı Yaratma */
+.case-wrapper {
+  position: relative;
+  /* 3 slaytımız var. Her biri için 100vh, artı ilk slayt için ek 100vh. Toplam 400vh kaydırma alanı. */
+  height: 400vh; 
+}
+
+/* 2. Animasyonun Gerçekleşeceği Yapışkan Alan */
+.sticky-container {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden; /* Bu olmazsa olmaz! Dışarı taşan animasyonları gizler. */
+}
+
+/* 3. Animasyon Sahnesi */
+.slides-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* 4. Sol ve Sağ Sütunların Temel Stilleri */
+.cs-text-column,
+.cs-image-column {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: transform 1.2s cubic-bezier(0.7, 0, 0.2, 1);
+  will-change: transform; /* Performans için tarayıcıya ipucu */
+}
+
+/* 5. Sol Sütun Detayları */
+.cs-text-column {
+  left: 0;
+  width: 40%;
+  padding: 0 4vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 10; /* Her zaman sağdaki resmin üstünde */
+  color: var(--text-light);
+}
+
+.cs-text-column h2 { font-size: 3rem; line-height: 1.1; }
+.cs-text-column small { display: block; margin: 1rem 0 2rem; }
+.cs-text-column p { line-height: 1.6; }
+
+/* 6. Sağ Sütun Detayları */
+.cs-image-column {
+  left: 40%; /* Sol sütundan sonra başlar */
+  width: 60%;
+}
+.cs-image-column img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.view-article {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  color: white;
+  text-decoration: none;
+  border: 1px solid white;
+  padding: 0.5rem 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+/* 7. Yamuk Görseller */
+.thumb-row { display: flex; gap: 1rem; margin-bottom: 2rem; }
+.thumb { width: 140px; height: 90px; object-fit: cover; }
+.thumb-1 { clip-path: polygon(0 0, 100% 15%, 100% 100%, 0 85%); }
+.thumb-2 { clip-path: polygon(0 15%, 100% 0, 100% 85%, 0 100%); }
+
+/* 8. Animasyon Tetikleyicileri */
+.cs-trigger {
+  height: 100vh;
+}

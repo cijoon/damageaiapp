@@ -1,0 +1,31 @@
+/* 1️⃣ Değişkenleri içeri aktar */
+@import "./variables.css";
+
+/* 2️⃣ Fontu tarayıcıya tanıt */
+@font-face {
+  font-family: "PP NeueBit";
+  src: url("/fonts/PPNeueBit.woff2") format("woff2");
+  font-display: swap; /* Font yüklenirken yazının görünmesini sağlar */
+}
+
+/* 3️⃣ Temel CSS Sıfırlama */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth; /* Sayfa içi linklere tıklayınca yumuşak kayar */
+  background: var(--bg-dark);
+  color: var(--text-light);
+  font-family: var(--body-font);
+}
+
+/* 4️⃣ Başlık Stilleri */
+h1, h2, h3, h4 {
+  font-family: var(--heading-font);
+  line-height: 0.9;
+}

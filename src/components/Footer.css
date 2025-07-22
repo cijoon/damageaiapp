@@ -1,0 +1,23 @@
+/* src/components/Footer.css */
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5vw;
+  text-align: center;
+  background-color: #0c1f1f;
+}
+
+.footer-section p {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-family: var(--heading-font);
+  margin: 0;
+}
+
+.footer-section a {
+  color: var(--accent-teal);
+  text-decoration: none;
+  font-size: 1.2rem;
+  margin-top: 1rem;
+}

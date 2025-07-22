@@ -1,0 +1,96 @@
+/* DOSYA ADI: src/components/PhoneShowcaseSection.css */
+/* Yeni üç katmanlı tasarım */
+
+.phone-section {
+  height: 300vh; /* 3 slayt için */
+  position: relative;
+}
+
+.sticky-container {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Katman 1: Arka Planlar */
+.backgrounds-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* En arkada */
+}
+.background-slide {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Katman 2 ve 3'ü Taşıyan Konteyner */
+.foreground-container {
+  position: relative;
+  z-index: 1; /* Arka planın önünde */
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+
+/* PhoneShowcaseSection.css dosyasındaki bu kuralları güncelleyin */
+
+/* Sol Sütun Stilleri */
+.showcase-content-column {
+  position: relative;
+  height: 100%;
+  overflow: hidden; /* İçeriden kayan film şeridini gizler */
+}
+
+/* YENİ: Sol taraftaki metinleri taşıyan film şeridi */
+.content-filmstrip {
+  height: 100%;
+  width: 100%;
+}
+
+/* Her bir metin bloğunun stili */
+.showcase-content-block {
+  width: 100%;
+  height: 100%; /* Artık her blok 100% yüksekliğinde (viewport kadar) */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vw;
+  box-sizing: border-box;
+}
+
+/* Başlık, alt başlık vb. stiller aynı kalabilir... */
+.showcase-title { font-size: clamp(3rem, 6vw, 5rem); font-family: var(--heading-font); margin-bottom: 1rem; }
+.showcase-subtitle { font-size: clamp(1rem, 2vw, 1.5rem); font-family: var(--heading-font); color: var(--accent-teal); margin-bottom: 2rem; }
+.showcase-description { font-size: 1rem; line-height: 1.7; max-width: 45ch; }
+
+/* Sağ Sütun Stilleri */
+.visuals-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.frameless-phone {
+  height: 80vh; /* Telefonun ekrandaki boyutu */
+  aspect-ratio: 9 / 19.5; /* Modern bir telefon en-boy oranı */
+  background-color: #000; /* Arka planı siyah yapar */
+  border-radius: 50px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); /* Derinlik hissi */
+}
+
+.screenshots-filmstrip,
+.screenshot-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
