@@ -1,7 +1,7 @@
 // DOSYA ADI: src/components/FinalCaseStudies/FinalCaseStudies.jsx
 // Sol sütun, sağ ile senkronize çalışan ayrı bloklar olarak yeniden düzenlendi.
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { slides } from '../../data/caseStudies';
 import './FinalCaseStudies.css';
@@ -24,6 +24,19 @@ export default function FinalCaseStudies() {
   // const contentTranslateY = useTransform(mainScrollProgress, [0, 1], ["0%", "-66.66%"]);
   
   const partDuration = 1 / slides.length;
+
+  useEffect(() => {
+    const blocks = document.querySelectorAll('.content-block');
+    const observer = new window.IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fc-animate');
+        }
+      });
+    }, { threshold: 0.3 });
+    blocks.forEach(block => observer.observe(block));
+    return () => observer.disconnect();
+  }, []);
 
   // DOSYA ADI: src/components/FinalCaseStudies/FinalCaseStudies.jsx
 // Sadece `.content-column` içindeki map döngüsünü güncelleyin.
@@ -84,9 +97,7 @@ export default function FinalCaseStudies() {
                   <motion.div className="image-zoom-wrapper" style={{ scale }}>
                     <img src={slide.hero} alt={slide.heading} />
                   </motion.div>
-                  <a href={slide.link} target="_blank" rel="noopener noreferrer" className="view-article">
-                    View Article ↗
-                  </a>
+                  {/* View Article butonu kaldırıldı */}
                 </motion.div>
               );
             }
@@ -99,9 +110,7 @@ export default function FinalCaseStudies() {
                 <motion.div className="image-zoom-wrapper" style={{ scale }}>
                   <img src={slide.hero} alt={slide.heading} />
                 </motion.div>
-                <a href={slide.link} target="_blank" rel="noopener noreferrer" className="view-article">
-                  View Article ↗
-                </a>
+                {/* View Article butonu kaldırıldı */}
               </motion.div>
             );
           })}

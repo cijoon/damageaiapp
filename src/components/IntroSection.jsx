@@ -29,8 +29,29 @@ export default function IntroSection() {
     }
   };
 
+  // Kullanıcı introda scroll yaparsa bir sonraki bölüme geç
+  const sectionRef = useRef(null);
+  React.useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    let scrolled = false;
+    const handleWheel = (e) => {
+      if (!scrolled && e.deltaY > 0) {
+        scrolled = true;
+        // Bir sonraki section'ı bul
+        const nextSection = section.nextElementSibling;
+        if (nextSection) {
+          nextSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        setTimeout(() => { scrolled = false; }, 1500); // Spam engeli
+      }
+    };
+    section.addEventListener('wheel', handleWheel, { passive: false });
+    return () => section.removeEventListener('wheel', handleWheel);
+  }, []);
+
   return (
-    <section id="intro" className="intro-section">
+    <section id="intro" className="intro-section" ref={sectionRef}>
       <video
         ref={videoRef} // ref'i videoya bağlıyoruz
         className="background-video"
@@ -45,10 +66,10 @@ export default function IntroSection() {
         {/* --- YENİ VİDEO KONTROLLERİ --- */}
         <div className="video-controls">
           <button onClick={handlePlayPause} className="control-button">
-            {isPlaying ? 'Durdur' : 'Oynat'}
+            {isPlaying ? 'Pause' : 'Play'}
           </button>
           <button onClick={handleMuteToggle} className="control-button">
-            {isMuted ? 'Sesi Aç' : 'Sessize Al'}
+            {isMuted ? 'Unmute' : 'Mute'}
           </button>
         </div>
       </div>

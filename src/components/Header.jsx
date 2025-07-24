@@ -19,7 +19,7 @@ export default function Header() {
         <div className="header-center">
           {/* --- DEĞİŞİKLİK BURADA --- */}
           {/* Dosya yolu .jpg'den .svg'ye değiştirildi */}
-          <img src="/images/damage-logo.svg" alt="Damage AI Logo" className="header-logo" />
+          <img src="/images/BERILL.png" alt="Damage AI Logo" className="header-logo" />
         </div>
         <div className="header-right">
           <div className="store-buttons-container">
@@ -27,7 +27,7 @@ export default function Header() {
               <img src="/images/app-store.svg" alt="App Store" />
               <span>App Store</span>
             </a>
-            <a href="#" className="store-button">
+            <a href="https://play.google.com/store/apps/details?id=com.zanugbisr.damagedetector" className="store-button" target="_blank" rel="noopener noreferrer">
               <img src="/images/play-store.svg" alt="Play Store" />
               <span>Play Store</span>
             </a>

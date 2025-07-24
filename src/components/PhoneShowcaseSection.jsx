@@ -1,7 +1,7 @@
 // DOSYA ADI: src/components/PhoneShowcaseSection.jsx
 // Sol ve Sağ sütunların yeri değiştirildi.
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { phoneSlides } from '../data/phoneShowcaseData';
 import './PhoneShowcaseSection.css';
@@ -16,6 +16,19 @@ export default function PhoneShowcaseSection() {
   });
 
   const contentTranslateY = useTransform(scrollYProgress, [0, 1], ["0%", `-${100 * (slideCount - 1)}%`]);
+
+  useEffect(() => {
+    const blocks = document.querySelectorAll('.showcase-content-block');
+    const observer = new window.IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('ps-animate');
+        }
+      });
+    }, { threshold: 0.3 });
+    blocks.forEach(block => observer.observe(block));
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section ref={sectionRef} className="phone-section">

@@ -94,3 +94,30 @@
   height: 100%;
   display: block;
 }
+
+@keyframes ps-text-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.showcase-title,
+.showcase-subtitle,
+.showcase-description {
+  opacity: 0;
+}
+
+.ps-animate .showcase-title,
+.ps-animate .showcase-subtitle,
+.ps-animate .showcase-description {
+  animation: ps-text-fade-in 1.1s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.ps-animate .showcase-title { animation-delay: 0.1s; }
+.ps-animate .showcase-subtitle { animation-delay: 0.3s; }
+.ps-animate .showcase-description { animation-delay: 0.5s; }

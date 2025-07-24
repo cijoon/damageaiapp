@@ -195,3 +195,30 @@
   color: var(--text-light);
   will-change: transform; /* Performans için ipucu */
 }
+
+@keyframes fc-text-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-block h2,
+.content-block small,
+.content-block p {
+  opacity: 0;
+}
+
+.fc-animate h2,
+.fc-animate small,
+.fc-animate p {
+  animation: fc-text-fade-in 1.1s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.fc-animate h2 { animation-delay: 0.1s; }
+.fc-animate small { animation-delay: 0.3s; }
+.fc-animate p { animation-delay: 0.5s; }
