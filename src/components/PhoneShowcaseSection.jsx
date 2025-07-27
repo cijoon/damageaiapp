@@ -5,10 +5,12 @@ import React, { useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { phoneSlides } from '../data/phoneShowcaseData';
 import './PhoneShowcaseSection.css';
+import { useDevice } from "../contexts/DeviceContext";
 
 export default function PhoneShowcaseSection() {
   const sectionRef = useRef(null);
   const slideCount = phoneSlides.length;
+  const { isMobile } = useDevice();
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -29,6 +31,33 @@ export default function PhoneShowcaseSection() {
     blocks.forEach(block => observer.observe(block));
     return () => observer.disconnect();
   }, []);
+
+  if (isMobile) {
+    const hardcodedDescriptions = [
+      `Fix it fast. Know your options.\nScan your issue. See nearby repairers or sellers. Get it done.\nFrom cracked walls to worn-out faucets, Damage AI instantly analyzes the problem and gives you cost estimates and smart suggestions — no rules broken.`,
+      `Smarter than a search. Faster than a call.\nPowered by real-time visual detection and marketplace data.\nDon’t waste time browsing. Just scan a broken object or damaged wall — and let Damage AI show you the best fix and price in seconds.`,
+      `Got damage? We've got answers.\nScan. Get options. Choose smart.\nWhether it’s a broken cabinet or a leaky pipe, just point your camera — Damage AI identifies the issue and tells you how to fix it, how much it’ll cost, and who can help.`
+    ];
+    return (
+      <section className="phone-mobile-section">
+        {phoneSlides.map((slide, idx) => (
+          <React.Fragment key={slide.id}>
+            <div className="phone-mobile-block">
+              <div className="phone-mobile-mockup">
+                <img src="/images/phone-mockup.png" alt="Phone Mockup" className="phone-mobile-mockup-img" />
+                <img src={slide.screenImage} alt="Screenshot" className="phone-mobile-screenshot" />
+              </div>
+            </div>
+            <div className="phone-mobile-content">
+              {hardcodedDescriptions[idx].split('\n').map((line, i) => (
+                <p key={i} className="showcase-description" style={{marginBottom: 8}}>{line}</p>
+              ))}
+            </div>
+          </React.Fragment>
+        ))}
+      </section>
+    );
+  }
 
   return (
     <section ref={sectionRef} className="phone-section">

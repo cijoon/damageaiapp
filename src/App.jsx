@@ -10,6 +10,29 @@ import PhoneShowcaseSection from './components/PhoneShowcaseSection';
 import ImageSequenceSection from './components/ImageSequenceSection';
 import ExperimentsSection from './components/ExperimentsSection';
 import Footer from './components/Footer';
+import { DeviceProvider, useDevice } from "./contexts/DeviceContext";
+
+function MainContent({ images, loading, progress }) {
+  const { isMobile } = useDevice();
+  if (loading && !isMobile) {
+    return <Preloader progress={progress} />;
+  }
+  return (
+    <>
+      <Header />
+      <main>
+        <IntroSection />
+        {!isMobile && <ImageSequenceSection images={images} />}
+        <FinalCaseStudies />
+        {/* Mobilde PhilosophySection gösterilmeyecek */}
+        {!isMobile && <PhilosophySection />}
+        <PhoneShowcaseSection />
+        <ExperimentsSection />
+        <Footer />
+      </main>
+    </>
+  );
+}
 
 export default function App() {
   const totalFrames = 135;
@@ -58,24 +81,9 @@ export default function App() {
     };
   }, []); // yalnızca ilk mount
 
-  // Yüklenirken Preloader göster
-  if (loading) {
-    return <Preloader progress={progress} />;
-  }
-
-  // Her şey yüklendi -> site
   return (
-    <>
-      <Header />
-      <main>
-        <IntroSection />
-        <ImageSequenceSection images={images} />
-        <FinalCaseStudies />
-        <PhilosophySection />
-        <PhoneShowcaseSection />
-        <ExperimentsSection />
-        <Footer />
-      </main>
-    </>
+    <DeviceProvider>
+      <MainContent images={images} loading={loading} progress={progress} />
+    </DeviceProvider>
   );
 }

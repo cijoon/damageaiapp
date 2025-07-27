@@ -5,8 +5,10 @@ import React, { useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { slides } from '../../data/caseStudies';
 import './FinalCaseStudies.css';
+import { useDevice } from "../../contexts/DeviceContext";
 
 export default function FinalCaseStudies() {
+  const { isMobile } = useDevice();
   const containerRef = useRef(null);
   const firstImageTriggerRef = useRef(null);
 
@@ -42,6 +44,27 @@ export default function FinalCaseStudies() {
 // Sadece `.content-column` içindeki map döngüsünü güncelleyin.
 
 // ... dosyanın üst kısımları aynı ...
+
+  if (isMobile) {
+    return (
+      <section className="fc-mobile-container">
+        {slides.map((slide) => (
+          <div key={slide.id} className="fc-mobile-block">
+            <img src={slide.hero} alt={slide.heading} className="fc-mobile-hero" />
+            <div className="fc-mobile-content">
+              <h2>{slide.heading}</h2>
+              <small>{slide.sub}</small>
+              <div className="thumb-row">
+                <img src={slide.thumb1} alt="" className="thumb thumb-1" />
+                <img src={slide.thumb2} alt="" className="thumb thumb-2" />
+              </div>
+              <p>{slide.body}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+    );
+  }
 
   return (
     <section ref={containerRef} className="scroll-container">

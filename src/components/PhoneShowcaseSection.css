@@ -109,7 +109,8 @@
 .showcase-title,
 .showcase-subtitle,
 .showcase-description {
-  opacity: 0;
+  opacity: 100;
+  text-align: center;
 }
 
 .ps-animate .showcase-title,
@@ -121,3 +122,85 @@
 .ps-animate .showcase-title { animation-delay: 0.1s; }
 .ps-animate .showcase-subtitle { animation-delay: 0.3s; }
 .ps-animate .showcase-description { animation-delay: 0.5s; }
+
+/* Mobil görünüm için eklenenler */
+@media (max-width: 768px) {
+  .phone-mobile-section {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 16px 0;
+    background: #181818;
+  }
+  .phone-mobile-block {
+    background: #222;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin: 0 12px;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: 16px;
+    position: relative;
+  }
+  .phone-mobile-mockup {
+    position: static !important;
+    width: 220px;
+    height: 320px;
+    margin: 20px auto 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+  .phone-mobile-mockup-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    position: static !important;
+    z-index: 1;
+  }
+  .phone-mobile-screenshot {
+    position: static !important;
+    width: 188px;
+    height: 272px;
+    object-fit: cover;
+    border-radius: 18px;
+    z-index: 2;
+    margin-left: -202px;
+    margin-top: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .phone-mobile-content {
+    margin-top: 16px;
+    color: #fff;
+    background: #222;
+    position: static !important;
+    z-index: auto !important;
+    min-height: 80px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    margin-left: 12px;
+    margin-right: 12px;
+    padding: 16px 12px;
+  }
+  .phone-mobile-content .showcase-title {
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+  .phone-mobile-content .showcase-subtitle {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .phone-mobile-content .showcase-description {
+    color: #fff !important;
+    font-size: 1.2rem;
+    background: none;
+    margin: 0 0 8px 0;
+    padding: 0;
+  }
+}

@@ -222,3 +222,58 @@
 .fc-animate h2 { animation-delay: 0.1s; }
 .fc-animate small { animation-delay: 0.3s; }
 .fc-animate p { animation-delay: 0.5s; }
+
+/* Mobil görünüm için eklenenler */
+@media (max-width: 768px) {
+  .fc-mobile-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 16px 0;
+    background: #181818;
+  }
+  .fc-mobile-block {
+    background: #222;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin: 0 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .fc-mobile-hero {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    display: block;
+    border-bottom: 1px solid #eee;
+  }
+  .fc-mobile-content {
+    padding: 16px 12px 20px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    color: #fff;
+  }
+  .fc-mobile-content h2 {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+  }
+  .fc-mobile-content small {
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .fc-mobile-content .thumb-row {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+  }
+  .fc-mobile-content p {
+    font-size: 1rem;
+    color: #ccc;
+    margin: 0;
+  }
+}
