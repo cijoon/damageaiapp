@@ -2,10 +2,10 @@
 import './ExperimentsSection.css'; // CSS dosyasını birazdan oluşturacağız
 
 const experiments = [
-  { id: 1, title: 'Milwaukee', image: '/images/Görüntü 1.07.2025 17.52 (1).jpg' },
-  { id: 2, title: 'Makita', image: '/images/Görüntü 1.07.2025 17.47.jpg' },
-  { id: 3, title: 'Snap-on', image: '/images/Görüntü 1.07.2025 17.52.jpg' },
-  { id: 4, title: 'DeWalt', image: '/images/Görüntü 1.07.2025 17.52 (2).jpg' },
+  { id: 1, title: 'Milwaukee', image: '/images/milwauke.jpg' },
+  { id: 2, title: 'Makita', image: '/images/makita.jpg' },
+  { id: 3, title: 'Snap-on', image: '/images/snapon.jpg' },
+  { id: 4, title: 'DeWalt', image: '/images/dewalt.jpg' },
 ];
 
 export default function ExperimentsSection() {
