@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Preloader from './components/Preloader';
 import Header from './components/Header';
-import IntroSection from './components/IntroSection';
+import IntroSection from './components/Introloader';
 import PhilosophySection from './components/PhilosophySection/PhilosophySection';
 import FinalCaseStudies from './components/FinalCaseStudies/FinalCaseStudies';
 import PhoneShowcaseSection from './components/PhoneShowcaseSection';
@@ -37,7 +37,7 @@ function MainContent({ images, loading, progress }) {
 
 export default function App() {
   const totalFrames = 135;
-  const initialFramesToLoad = 70; // <<< DEĞİŞTİRİLDİ: Başlangıçta yüklenecek kare sayısı 70 olarak ayarlandı
+  // initialFramesToLoad kaldırıldı, çünkü artık tüm 135 kareyi baştan yükleyeceğiz.
   // preloaderMinimumDisplayTime (3 saniye gecikme) özelliği kaldırıldı.
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
@@ -48,13 +48,13 @@ export default function App() {
 
   useEffect(() => {
     let isCancelled = false;
-    let loadedInitialCount = 0; // Başlangıç kareleri için yüklenen sayacı
 
-    const preloadInitialFrames = async () => {
-      const tempImages = [...images]; // Mevcut images dizisinin bir kopyası
-      const initialImagePromises = []; // Başlangıç karelerinin yükleme sözleri
+    const preloadAllFrames = async () => { // Fonksiyon adını preloadAllFrames olarak değiştirdik
+      const tempImages = Array(totalFrames).fill(null); // Tüm kareler için boş bir dizi oluştur
+      const imageLoadPromises = [];
+      let loadedCount = 0;
 
-      for (let i = 0; i < initialFramesToLoad; i++) {
+      for (let i = 0; i < totalFrames; i++) { // <<< DEĞİŞTİRİLDİ: Tüm 135 kareyi yükle
         if (isCancelled) return;
 
         const img = new Image();
@@ -66,51 +66,24 @@ export default function App() {
           .finally(() => {
             if (!isCancelled) {
               tempImages[i] = img; // Yüklenen ve çözümlenen resmi doğru indekse yerleştir
-              loadedInitialCount++;
-              // İlerleme çubuğu sadece başlangıç karelerinin yüklemesini yansıtacak (70 kare için)
-              setProgress(Math.round((loadedInitialCount / initialFramesToLoad) * 100));
+              loadedCount++;
+              // İlerleme çubuğu tüm karelerin yüklemesini yansıtacak (135 kare için)
+              setProgress(Math.round((loadedCount / totalFrames) * 100));
             }
           });
-        initialImagePromises.push(loadPromise);
+        imageLoadPromises.push(loadPromise);
       }
 
-      // Sadece başlangıç görsellerinin (ilk 70 kare) yüklenmesini/çözümlenmesini bekle
-      await Promise.all(initialImagePromises);
+      // <<< DEĞİŞTİRİLDİ: Sadece tüm 135 görselin yüklenmesini/çözümlenmesini bekle
+      await Promise.all(imageLoadPromises);
 
       if (!isCancelled) {
-        setImages(tempImages); // İlk yüklenen kareleri state'e kaydet
-        setLoading(false); // <<< DEĞİŞTİRİLDİ: Preloader'ı hemen kapat (3 saniye delay yok)
-
-        // Arka planda kalan resimleri yüklemeye başla (gecikmeden etkilenmez)
-        preloadRemainingFrames(tempImages, loadedInitialCount);
+        setImages(tempImages); // Tüm yüklenen ve çözümlenen kareleri state'e kaydet
+        setLoading(false); // Preloader'ı hemen kapat
       }
     };
 
-    const preloadRemainingFrames = async (currentImages, startingLoadedCount) => {
-      const tempImages = [...currentImages]; // Güncel images dizisinin bir kopyası
-
-      for (let i = startingLoadedCount; i < totalFrames; i++) {
-        if (isCancelled) return;
-
-        const img = new Image();
-        img.src = imagePath(i);
-
-        try {
-          await img.decode();
-        } catch (_) {
-          // Hata durumunda bile yer tutsun
-        }
-
-        tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
-
-        // Her bir kare yüklendikçe state'i güncelle
-        if (!isCancelled) {
-            setImages([...tempImages]); // Yeni bir dizi oluşturarak state güncellemesini tetikle
-        }
-      }
-    };
-
-    preloadInitialFrames();
+    preloadAllFrames(); // Tüm kareleri yükleme işlemini başlat
 
     return () => {
       isCancelled = true; // Bileşen unmount edildiğinde veya effect yeniden çalıştığında yüklemeyi iptal et
