@@ -6,7 +6,7 @@ const LoadingScreen = ({ onLoadingComplete }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const duration = 20000; // 5 saniye - Burası hala 5000 ms (5 saniye)
+    const duration = 17000; // 5 saniye - Burası hala 5000 ms (5 saniye)
     const intervalTime = 50; // Her 50 ms'de bir güncelle
 
     const increment = (100 * intervalTime) / duration; // Her adımda ne kadar ilerleyecek
