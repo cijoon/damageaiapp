@@ -37,9 +37,9 @@ function MainContent({ images, loading, progress }) {
 
 export default function App() {
   const totalFrames = 135;
-  // <<< DEĞİŞTİRİLDİ: initialFramesToLoad kaldırıldı, tüm görseller yüklenecek
+  // <<< DEĞİŞTİRİLDİ: imagePath fonksiyonu yeni dosya adlandırma formatına göre güncellendi (ek _result)
   const imagePath = (frame) =>
-    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result.webp`;
+    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result_result.webp`;
 
   const [images, setImages] = useState(Array(totalFrames).fill(null));
   const [loading, setLoading] = useState(true);
@@ -65,7 +65,6 @@ export default function App() {
             if (!isCancelled) {
               tempImages[i] = img;
               loadedCount++;
-              // <<< DEĞİŞTİRİLDİ: Progress tüm karelerin yüklenmesini yansıtacak
               setProgress(Math.round((loadedCount / totalFrames) * 100));
             }
           });
@@ -77,7 +76,7 @@ export default function App() {
 
       if (!isCancelled) {
         setImages(tempImages);
-        setLoading(false); // <<< DEĞİŞTİRİLDİ: Tüm görseller yüklendikten sonra preloader'ı kapat
+        setLoading(false); // Tüm görseller yüklendikten sonra preloader'ı kapat
       }
     };
 
