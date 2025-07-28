@@ -1,7 +1,8 @@
 // DOSYA ADI: src/App.jsx
 
 import React, { useState, useEffect } from 'react';
-import LoadingScreen from './components/LoadingScreen/LoadingScreen'; // LoadingScreen bileşenini ekledik
+// LoadingScreen artık kullanılmadığı için import satırını sildik
+// import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
@@ -39,17 +40,11 @@ export default function App() {
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
 
   const [images, setImages] = useState(Array(totalFrames).fill(null));
-  // Yükleme ekranının görünürlüğünü kontrol eden yeni state
-  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
-
-  // useDevice hook'unu App bileşeni içinde kullanabilmek için DeviceProvider'ın Child'ı olması gerekir.
-  // Bu yüzden isMobile state'ini doğrudan App bileşeninde kontrol etmek yerine
-  // LoadingScreen'i koşullu olarak render ederken MainContent'e DeviceProvider'ı sarmalayacağız.
-  // Veya daha iyisi, App bileşeni içinde isMobile durumunu elde edip loading ekranını buna göre göstermeliyiz.
+  // Yükleme ekranının görünürlüğünü kontrol eden state artık gerekli değil
+  // const [showLoadingScreen, setShowLoadingScreen] = useState(true);
 
   useEffect(() => {
     let isCancelled = false;
-    let loadedCount = 0;
 
     const preloadAllFrames = async () => {
       const tempImages = Array(totalFrames).fill(null);
@@ -66,7 +61,7 @@ export default function App() {
           .finally(() => {
             if (!isCancelled) {
               tempImages[i] = img;
-              loadedCount++;
+              // loadedCount artık kullanılmadığı için kaldırıldı
             }
           });
         imageLoadPromises.push(loadPromise);
@@ -86,38 +81,17 @@ export default function App() {
     };
   }, []);
 
-  // LoadingScreen bileşeninin 5 saniye sonra kendini tamamlaması için bir callback fonksiyonu
-  const handleLoadingScreenComplete = () => {
-    setShowLoadingScreen(false); // 5 saniye dolduğunda loading ekranını gizle
-  };
+  // LoadingScreen ile ilgili callback fonksiyonu artık gerekli değil
+  // const handleLoadingScreenComplete = () => {
+  //   setShowLoadingScreen(false);
+  // };
 
   return (
     <DeviceProvider>
-      {/* DeviceProvider içinde useDevice hook'unu kullanarak isMobile'ı alıyoruz */}
-      {/* showLoadingScreen durumunu kontrol etmeden önce isMobile durumunu kontrol edeceğiz */}
-      <AppContent
-        showLoadingScreen={showLoadingScreen}
-        handleLoadingScreenComplete={handleLoadingScreenComplete}
-        images={images}
-      />
+      {/* AppContent bileşeni artık gerekli değil, doğrudan MainContent'i render ediyoruz */}
+      <MainContent images={images} />
     </DeviceProvider>
   );
 }
 
-// Yeni bir bileşen oluşturarak App bileşeninin içindeki mantığı ayırıyoruz.
-// Böylece useDevice hook'unu kullanabiliriz.
-function AppContent({ showLoadingScreen, handleLoadingScreenComplete, images }) {
-  const { isMobile } = useDevice(); // isMobile durumunu buradan alıyoruz
-
-  return (
-    <>
-      {/* Sadece mobilde değilse ve showLoadingScreen true ise LoadingScreen'i göster */}
-      {showLoadingScreen && !isMobile ? (
-        <LoadingScreen onLoadingComplete={handleLoadingScreenComplete} />
-      ) : (
-        // Eğer LoadingScreen gösterilmiyorsa veya mobil ise MainContent'i göster
-        <MainContent images={images} />
-      )}
-    </>
-  );
-}
+// AppContent bileşeni ve içindeki LoadingScreen koşullu render mantığı tamamen kaldırıldı.
