@@ -15,7 +15,7 @@ export default function Preloader({ progress = 0 }) {
         inset: 0,
         width: "100vw",
         height: "100vh",
-        backgroundImage: "url('/loading.png')",
+        backgroundImage: "url('/loading.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
