@@ -1,6 +1,6 @@
 // DOSYA ADI: src/App.jsx
 
-import React, { useState, useEffect } from 'react'; // useRef kaldırıldı, artık kullanılmıyor
+import React, { useState, useEffect } from 'react';
 import Preloader from './components/Preloader';
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
@@ -20,41 +20,39 @@ function MainContent({ images, loading, progress }) {
   return (
     <>
       <Header />
-     <main>
+      <main>
         <IntroSection />
+        {/* Sadece mobilde değilse ImageSequenceSection'ı göster */}
+        {!isMobile && <ImageSequenceSection images={images} />}
+        <FinalCaseStudies />
         {/* Mobilde PhilosophySection gösterilmeyecek */}
         {!isMobile && <PhilosophySection />}
-       <FinalCaseStudies />
-          {/* Sadece mobilde değilse ImageSequenceSection'ı göster */}
-        {!isMobile && <ImageSequenceSection images={images} />}       
         <PhoneShowcaseSection />
-       <ExperimentsSection />
-       <Footer />
-     </main>
+        <ExperimentsSection />
+        <Footer />
+      </main>
     </>
   );
 }
 
 export default function App() {
   const totalFrames = 135;
-  // <<< DEĞİŞTİRİLDİ: Başlangıçta yüklenecek kare sayısı 40 olarak ayarlandı
-  const initialFramesToLoad = 40;
+  const initialFramesToLoad = 40; // Başlangıçta yüklenecek kare sayısı 40
+  // <<< DEĞİŞTİRİLDİ: imagePath fonksiyonu yeni dosya adlandırma formatına göre güncellendi
   const imagePath = (frame) =>
-    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
+    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result.webp`;
 
   const [images, setImages] = useState(Array(totalFrames).fill(null));
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0); // % göstergesi
-
-  // Önceki timer bazlı ilerleme ve ref'ler artık kullanılmıyor, kaldırıldı.
 
   useEffect(() => {
     let isCancelled = false;
     let loadedInitialCount = 0; // Başlangıç (ilk 40) kareleri için yüklenen sayacı
 
     const preloadInitialFrames = async () => {
-      const tempImages = [...images]; // Mevcut images dizisinin bir kopyası
-      const initialImagePromises = []; // Başlangıç karelerinin yükleme sözleri
+      const tempImages = [...images];
+      const initialImagePromises = [];
 
       for (let i = 0; i < initialFramesToLoad; i++) {
         if (isCancelled) return;
@@ -62,34 +60,30 @@ export default function App() {
         const img = new Image();
         img.src = imagePath(i);
 
-        // Her resmin yüklenmesi ve çözümlenmesi (decode) için bir Promise oluştur
         const loadPromise = img.decode()
           .catch(() => { /* decode hatasını yoksay */ })
           .finally(() => {
             if (!isCancelled) {
-              tempImages[i] = img; // Yüklenen ve çözümlenen resmi doğru indekse yerleştir
+              tempImages[i] = img;
               loadedInitialCount++;
-              // İlerleme çubuğu sadece başlangıç karelerinin yüklemesini yansıtacak (ilk 40 kareye göre %0-100)
               setProgress(Math.round((loadedInitialCount / initialFramesToLoad) * 100));
             }
           });
         initialImagePromises.push(loadPromise);
       }
 
-      // Sadece başlangıç görsellerinin (ilk 40 kare) yüklenmesini/çözümlenmesini bekle
       await Promise.all(initialImagePromises);
 
       if (!isCancelled) {
-        setImages(tempImages); // İlk yüklenen kareleri state'e kaydet
-        setLoading(false); // <<< DEĞİŞTİRİLDİ: İlk 40 görsel yüklendikten sonra preloader'ı hemen kapat
+        setImages(tempImages);
+        setLoading(false); // İlk 40 görsel yüklendikten sonra preloader'ı hemen kapat
 
-        // Arka planda kalan resimleri yüklemeye başla
-        preloadRemainingFrames(tempImages, loadedInitialCount);
+        preloadRemainingFrames(tempImages, loadedInitialCount); // Arka planda kalanları yükle
       }
     };
 
     const preloadRemainingFrames = async (currentImages, startingLoadedCount) => {
-      const tempImages = [...currentImages]; // Güncel images dizisinin bir kopyası
+      const tempImages = [...currentImages];
 
       for (let i = startingLoadedCount; i < totalFrames; i++) {
         if (isCancelled) return;
@@ -103,22 +97,19 @@ export default function App() {
           // Hata durumunda bile yer tutsun
         }
 
-        tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
-
-        // Her bir kare yüklendikçe state'i güncelle (bu, ImageSequenceSection'ın resimleri almasını sağlar)
+        tempImages[i] = img;
         if (!isCancelled) {
-            setImages([...tempImages]); // Yeni bir dizi oluşturarak state güncellemesini tetikle
+            setImages([...tempImages]);
         }
       }
     };
 
-    preloadInitialFrames(); // Başlangıç yükleme işlemini başlat
+    preloadInitialFrames();
 
-    // Bileşen unmount edildiğinde veya effect yeniden çalıştığında yüklemeyi iptal et
     return () => {
       isCancelled = true;
     };
-  }, []); // Yalnızca ilk mount
+  }, []);
 
   return (
     <DeviceProvider>
