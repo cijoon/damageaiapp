@@ -14,7 +14,7 @@ import { DeviceProvider, useDevice } from "./contexts/DeviceContext";
 
 function MainContent({ images, loading, progress }) {
   const { isMobile } = useDevice();
-  if (loading && !isMobile) {
+  if (loading && !isMobile) { // Mobil olmayan cihazlarda yükleme ekranını göster
     return <Preloader progress={progress} />;
   }
   return (
@@ -38,38 +38,47 @@ function MainContent({ images, loading, progress }) {
 export default function App() {
   const totalFrames = 135;
   const initialFramesToLoad = 20; // İlk yüklenecek kare sayısı
+  const minPreloaderDisplayTime = 1500; // <<< YENİ EKLEDİK: Minimum 1.5 saniye yükleme ekranı gösterilecek
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`; // .webp uzantısını kullanmayı unutmayın!
 
-  // images state'ini artık doğrudan Image nesneleri dizisi olarak değil,
-  // her kare için bir Image nesnesi veya null/undefined içeren bir dizi olarak başlatıyoruz.
   const [images, setImages] = useState(Array(totalFrames).fill(null));
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0); // % göstergesi
 
   useEffect(() => {
     let isCancelled = false;
-    let loadedCount = 0; // Toplam yüklenen kare sayısı
+    let loadedCount = 0;
 
     const preloadInitialFrames = async () => {
-      const tempImages = [...images]; // Mevcut images dizisinin bir kopyası
+      const tempImages = [...images];
+      const imageLoadPromises = [];
 
       for (let i = 0; i < initialFramesToLoad; i++) {
-        if (isCancelled) return;
+        if (isCancelled) return; // Yükleme iptal edildiyse dur
 
         const img = new Image();
         img.src = imagePath(i);
-
-        try {
-          await img.decode();
-        } catch (_) {
-          // Hata durumunda bile push et, resim bozuksa bile yer tutsun
-        }
-
-        tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
-        loadedCount++;
-        setProgress(Math.round((loadedCount / initialFramesToLoad) * 100)); // Preloader sadece başlangıç karelerini gösterecek
+        
+        // Her resmin yüklenmesi için bir Promise oluştur
+        const loadPromise = img.decode()
+          .catch(() => { /* decode hatasını yoksay */ })
+          .finally(() => {
+            if (!isCancelled) {
+              tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
+              loadedCount++;
+              // İlerleme çubuğu sadece ilk karelerin yüklemesini yansıtır
+              setProgress(Math.round((loadedCount / initialFramesToLoad) * 100));
+            }
+          });
+        imageLoadPromises.push(loadPromise);
       }
+
+      // Minimum bekleme süresi için bir Promise oluştur
+      const minTimePromise = new Promise(resolve => setTimeout(resolve, minPreloaderDisplayTime)); //
+
+      // Hem resimlerin yüklenmesini hem de minimum sürenin dolmasını bekle
+      await Promise.all([...imageLoadPromises, minTimePromise]); //
 
       if (!isCancelled) {
         setImages(tempImages); // İlk yüklenen kareleri state'e kaydet
@@ -81,7 +90,7 @@ export default function App() {
     };
 
     const preloadRemainingFrames = async (currentImages, startingLoadedCount) => {
-      const tempImages = [...currentImages]; // Güncel images dizisinin bir kopyası
+      const tempImages = [...currentImages];
 
       for (let i = startingLoadedCount; i < totalFrames; i++) {
         if (isCancelled) return;
@@ -95,11 +104,8 @@ export default function App() {
           // Hata durumunda bile yer tutsun
         }
 
-        tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
+        tempImages[i] = img;
 
-        // Her bir kare yüklendikçe state'i güncelle (performans için batching yapabiliriz, şimdilik bu şekilde)
-        // Çok sık re-render'ı engellemek için her karede setImages yerine, belli aralıklarla veya sonda bir kez setImages yapmayı düşünebilirsiniz.
-        // Ancak bu örnekte her yüklenen karede güncelliyoruz ki ImageSequenceSection onu kullanabilsin.
         if (!isCancelled) {
             setImages([...tempImages]); // Yeni bir dizi oluşturarak state güncellemesini tetikle
         }
