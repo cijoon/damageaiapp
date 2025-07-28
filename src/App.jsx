@@ -38,7 +38,7 @@ function MainContent({ images, loading, progress }) {
 export default function App() {
   const totalFrames = 135;
   const initialFramesToLoad = 20; // İlk yüklenecek kare sayısı
-  const preloaderDelayAfterInitialLoad = 3000; // <<< YENİ EKLEDİK: Yükleme bittikten sonra 3 saniye gecikme
+  const preloaderDelayAfterInitialLoad = 3000; // <<< YENİ EKLENDİ: Başlangıç yüklemesi bittikten sonra 3 saniye gecikme
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`; // .webp uzantısını kullanmayı unutmayın!
 
@@ -54,38 +54,33 @@ export default function App() {
 
     const preloadInitialFrames = async () => {
       const tempImages = [...images]; // Mevcut images dizisinin bir kopyası
-      const initialImagePromises = []; // İlk karelerin yükleme sözleri
 
       for (let i = 0; i < initialFramesToLoad; i++) {
-        if (isCancelled) return; // Yükleme iptal edildiyse dur
+        if (isCancelled) return;
 
         const img = new Image();
         img.src = imagePath(i);
 
-        const loadPromise = img.decode()
-          .catch(() => { /* decode hatasını yoksay */ })
-          .finally(() => {
-            if (!isCancelled) {
-              tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
-              loadedCount++;
-              setProgress(Math.round((loadedCount / initialFramesToLoad) * 100)); // Preloader sadece başlangıç karelerini gösterecek
-            }
-          });
-        initialImagePromises.push(loadPromise);
-      }
+        try {
+          await img.decode();
+        } catch (_) {
+          // Hata durumunda bile push et, resim bozuksa bile yer tutsun
+        }
 
-      // Tüm ilk karelerin (initialFramesToLoad) yüklenmesini bekle
-      await Promise.all(initialImagePromises);
+        tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
+        loadedCount++;
+        setProgress(Math.round((loadedCount / initialFramesToLoad) * 100)); // Preloader sadece başlangıç karelerini gösterecek
+      }
 
       if (!isCancelled) {
         setImages(tempImages); // İlk yüklenen kareleri state'e kaydet
 
-        // <<< BURAYI DEĞİŞTİRDİK: Yeterli yükleme tamamlandıktan sonra gecikme ekle
+        // <<< BURAYI GÜNCELLEDİK: Preloader'ı kapatmadan önce 3 saniye gecikme
         setTimeout(() => {
           if (!isCancelled) { // Zamanlayıcı tetiklendiğinde bile iptal edilip edilmediğini kontrol et
             setLoading(false); // Preloader'ı gecikmeden sonra kapat
           }
-        }, preloaderDelayAfterInitialLoad); // Belirlenen gecikme süresi (örneğin 3 saniye)
+        }, preloaderDelayAfterInitialLoad); // Belirlenen gecikme süresi (3 saniye)
 
         // Arka planda kalan resimleri yüklemeye hemen başla (gecikmeden etkilenmez)
         preloadRemainingFrames(tempImages, loadedCount);
