@@ -37,7 +37,7 @@ function MainContent({ images, loading, progress }) {
 export default function App() {
   const totalFrames = 135;
   const imagePath = (frame) =>
-    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.jpg`;
+    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
 
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);

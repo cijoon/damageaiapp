@@ -67,9 +67,25 @@
 }
 
 /* Başlık, alt başlık vb. stiller aynı kalabilir... */
-.showcase-title { font-size: clamp(3rem, 6vw, 5rem); font-family: var(--heading-font); margin-bottom: 1rem; }
-.showcase-subtitle { font-size: clamp(1rem, 2vw, 1.5rem); font-family: var(--heading-font); color: var(--accent-teal); margin-bottom: 2rem; }
-.showcase-description { font-size: 1rem; line-height: 1.7; max-width: 45ch; }
+.showcase-title { 
+  font-size: clamp(3rem, 6vw, 5rem); 
+  font-family: var(--heading-font); 
+  margin-bottom: 1rem; 
+  text-align: left; /* BURAYI DEĞİŞTİRDİK */
+}
+.showcase-subtitle { 
+  font-size: clamp(1rem, 2vw, 1.5rem); 
+  font-family: var(--heading-font); 
+  color: var(--accent-teal); 
+  margin-bottom: 2rem; 
+  text-align: left; /* BURAYI DEĞİŞTİRDİK */
+}
+.showcase-description { 
+  font-size: 1rem; 
+  line-height: 1.7; 
+  max-width: 45ch; 
+  text-align: left; /* BURAYI DEĞİŞTİRDİK */
+}
 
 /* Sağ Sütun Stilleri */
 .visuals-column {
@@ -109,8 +125,8 @@
 .showcase-title,
 .showcase-subtitle,
 .showcase-description {
-  opacity: 100;
-  text-align: center;
+  opacity: 1; /* BURAYI DEĞİŞTİRDİK: 100 yerine 1 */
+  /* text-align: center; <--- Buradaki 'text-align: center;' kaldırıldı çünkü yukarıdaki spesifik kurallara taşındı */
 }
 
 .ps-animate .showcase-title,
@@ -189,12 +205,14 @@
     font-size: 1.2rem;
     margin-bottom: 4px;
     color: #fff;
+    text-align: left; /* Mobil görünümde de sola hizalı olsun */
   }
   .phone-mobile-content .showcase-subtitle {
     color: #fff;
     font-size: 1rem;
     margin-bottom: 8px;
     display: block;
+    text-align: left; /* Mobil görünümde de sola hizalı olsun */
   }
   .phone-mobile-content .showcase-description {
     color: #fff !important;
@@ -202,5 +220,6 @@
     background: none;
     margin: 0 0 8px 0;
     padding: 0;
+    text-align: left; /* Mobil görünümde de sola hizalı olsun */
   }
 }
