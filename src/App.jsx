@@ -37,8 +37,8 @@ function MainContent({ images, loading, progress }) {
 
 export default function App() {
   const totalFrames = 135;
-  const initialFramesToLoad = 50; // <<< YENİ: Başlangıçta yüklenecek kare sayısı 50'ye çıkarıldı
-  const preloaderMinimumDisplayTime = 3000; // <<< Minimum 3 saniye yükleme ekranı gösterilecek
+  const initialFramesToLoad = 70; // <<< DEĞİŞTİRİLDİ: Başlangıçta yüklenecek kare sayısı 70 olarak ayarlandı
+  // preloaderMinimumDisplayTime (3 saniye gecikme) özelliği kaldırıldı.
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
 
@@ -67,23 +67,19 @@ export default function App() {
             if (!isCancelled) {
               tempImages[i] = img; // Yüklenen ve çözümlenen resmi doğru indekse yerleştir
               loadedInitialCount++;
-              // İlerleme çubuğu sadece başlangıç karelerinin yüklemesini yansıtacak
+              // İlerleme çubuğu sadece başlangıç karelerinin yüklemesini yansıtacak (70 kare için)
               setProgress(Math.round((loadedInitialCount / initialFramesToLoad) * 100));
             }
           });
         initialImagePromises.push(loadPromise);
       }
 
-      // Minimum bekleme süresi (3 saniye) için bir Promise oluştur
-      const minTimePromise = new Promise(resolve => setTimeout(resolve, preloaderMinimumDisplayTime));
-
-      // <<< BURAYI DEĞİŞTİRDİK: Hem başlangıç görsellerinin yüklenmesini/çözümlenmesini
-      //     hem de minimum sürenin dolmasını bekle
-      await Promise.all([...initialImagePromises, minTimePromise]);
+      // Sadece başlangıç görsellerinin (ilk 70 kare) yüklenmesini/çözümlenmesini bekle
+      await Promise.all(initialImagePromises);
 
       if (!isCancelled) {
         setImages(tempImages); // İlk yüklenen kareleri state'e kaydet
-        setLoading(false); // Preloader'ı kapat
+        setLoading(false); // <<< DEĞİŞTİRİLDİ: Preloader'ı hemen kapat (3 saniye delay yok)
 
         // Arka planda kalan resimleri yüklemeye başla (gecikmeden etkilenmez)
         preloadRemainingFrames(tempImages, loadedInitialCount);
@@ -107,7 +103,7 @@ export default function App() {
 
         tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
 
-        // Her bir kare yüklendikçe state'i güncelle (performans için batching yapabiliriz, şimdilik bu şekilde)
+        // Her bir kare yüklendikçe state'i güncelle
         if (!isCancelled) {
             setImages([...tempImages]); // Yeni bir dizi oluşturarak state güncellemesini tetikle
         }
