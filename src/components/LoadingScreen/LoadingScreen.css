@@ -6,9 +6,9 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8); /* Video veya resim üzerine hafif şeffaf katman */
-  /* display: flex;         <-- BU SATIRLARI KALDIRDIK */
-  /* justify-content: flex-end; <-- BU SATIRLARI KALDIRDIK */
-  /* align-items: flex-end;   <-- BU SATIRLARI KALDIRDIK */
+  display: flex; /* **DEĞİŞİKLİK YOK - Önceki kodunuzdaki gibi kalacak** */
+  justify-content: center; /* **DEĞİŞİKLİK YOK - Önceki kodunuzdaki gibi kalacak** */
+  align-items: flex-end; /* **DEĞİŞİKLİK YOK - Önceki kodunuzdaki gibi kalacak** */
   z-index: 9999;
   color: white;
   font-family: Arial, sans-serif;
@@ -27,10 +27,10 @@
 }
 
 .loading-content {
-  position: absolute; /* **DEĞİŞTİRİLDİ**: Absolute konumlandırma */
-  bottom: 50px;       /* **YENİ**: Alttan 50px boşluk */
-  right: 50px;        /* **YENİ**: Sağdan 50px boşluk */
   text-align: center;
+  margin-bottom: 50px; /* Alttan boşluğu kontrol eder (eski 100px yerine 50px bırakabiliriz) */
+  margin-left: auto;   /* **YENİ**: Sağ tarafa yaslamak için otomatik sol margin */
+  margin-right: 50px;  /* **YENİ**: Sağdan 50px boşluk */
   z-index: 1;
 }
 
@@ -41,9 +41,9 @@
   border-radius: 10px;
   overflow: hidden;
   margin-top: 20px;
-  /* `loading-content` artık absolute konumda olduğu için bu margin'ler gereksiz */
-  margin-left: auto;
-  margin-right: auto;
+  /* `loading-content` içindeki margin'ler sayesinde otomatik ortalama ayarları korunacak */
+  margin-left: auto;  /* Barın kendi içinde ortalanması için */
+  margin-right: auto; /* Barın kendi içinde ortalanması için */
 }
 
 .progress-bar-fill {
