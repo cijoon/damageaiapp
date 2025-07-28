@@ -37,22 +37,22 @@ function MainContent({ images, loading, progress }) {
 
 export default function App() {
   const totalFrames = 135;
-  const initialFramesToLoad = 20; // İlk yüklenecek kare sayısı
+  const initialFramesToLoad = 50; // <<< YENİ: Başlangıçta yüklenecek kare sayısı 50'ye çıkarıldı
+  const preloaderMinimumDisplayTime = 3000; // <<< Minimum 3 saniye yükleme ekranı gösterilecek
   const imagePath = (frame) =>
-    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`; // .webp uzantısını kullanmayı unutmayın!
+    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
 
-  // images state'ini artık doğrudan Image nesneleri dizisi olarak değil,
-  // her kare için bir Image nesnesi veya null/undefined içeren bir dizi olarak başlatıyoruz.
   const [images, setImages] = useState(Array(totalFrames).fill(null));
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0); // % göstergesi
 
   useEffect(() => {
     let isCancelled = false;
-    let loadedCount = 0; // Toplam yüklenen kare sayısı
+    let loadedInitialCount = 0; // Başlangıç kareleri için yüklenen sayacı
 
     const preloadInitialFrames = async () => {
       const tempImages = [...images]; // Mevcut images dizisinin bir kopyası
+      const initialImagePromises = []; // Başlangıç karelerinin yükleme sözleri
 
       for (let i = 0; i < initialFramesToLoad; i++) {
         if (isCancelled) return;
@@ -60,23 +60,33 @@ export default function App() {
         const img = new Image();
         img.src = imagePath(i);
 
-        try {
-          await img.decode();
-        } catch (_) {
-          // Hata durumunda bile push et, resim bozuksa bile yer tutsun
-        }
-
-        tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
-        loadedCount++;
-        setProgress(Math.round((loadedCount / initialFramesToLoad) * 100)); // Preloader sadece başlangıç karelerini gösterecek
+        // Her resmin yüklenmesi ve çözümlenmesi (decode) için bir Promise oluştur
+        const loadPromise = img.decode()
+          .catch(() => { /* decode hatasını yoksay */ })
+          .finally(() => {
+            if (!isCancelled) {
+              tempImages[i] = img; // Yüklenen ve çözümlenen resmi doğru indekse yerleştir
+              loadedInitialCount++;
+              // İlerleme çubuğu sadece başlangıç karelerinin yüklemesini yansıtacak
+              setProgress(Math.round((loadedInitialCount / initialFramesToLoad) * 100));
+            }
+          });
+        initialImagePromises.push(loadPromise);
       }
+
+      // Minimum bekleme süresi (3 saniye) için bir Promise oluştur
+      const minTimePromise = new Promise(resolve => setTimeout(resolve, preloaderMinimumDisplayTime));
+
+      // <<< BURAYI DEĞİŞTİRDİK: Hem başlangıç görsellerinin yüklenmesini/çözümlenmesini
+      //     hem de minimum sürenin dolmasını bekle
+      await Promise.all([...initialImagePromises, minTimePromise]);
 
       if (!isCancelled) {
         setImages(tempImages); // İlk yüklenen kareleri state'e kaydet
         setLoading(false); // Preloader'ı kapat
 
-        // Arka planda kalan resimleri yüklemeye başla
-        preloadRemainingFrames(tempImages, loadedCount);
+        // Arka planda kalan resimleri yüklemeye başla (gecikmeden etkilenmez)
+        preloadRemainingFrames(tempImages, loadedInitialCount);
       }
     };
 
@@ -98,8 +108,6 @@ export default function App() {
         tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
 
         // Her bir kare yüklendikçe state'i güncelle (performans için batching yapabiliriz, şimdilik bu şekilde)
-        // Çok sık re-render'ı engellemek için her karede setImages yerine, belli aralıklarla veya sonda bir kez setImages yapmayı düşünebilirsiniz.
-        // Ancak bu örnekte her yüklenen karede güncelliyoruz ki ImageSequenceSection onu kullanabilsin.
         if (!isCancelled) {
             setImages([...tempImages]); // Yeni bir dizi oluşturarak state güncellemesini tetikle
         }
@@ -109,7 +117,7 @@ export default function App() {
     preloadInitialFrames();
 
     return () => {
-      isCancelled = true;
+      isCancelled = true; // Bileşen unmount edildiğinde veya effect yeniden çalıştığında yüklemeyi iptal et
     };
   }, []); // Yalnızca ilk mount
 
