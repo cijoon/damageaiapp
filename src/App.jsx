@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Preloader from './components/Preloader';
 import Header from './components/Header';
-import IntroSection from './components/Introloader';
+import IntroSection from './components/IntroSection'; // <<< HATA DÜZELTİLDİ: Introloader yerine IntroSection
 import PhilosophySection from './components/PhilosophySection/PhilosophySection';
 import FinalCaseStudies from './components/FinalCaseStudies/FinalCaseStudies';
 import PhoneShowcaseSection from './components/PhoneShowcaseSection';
@@ -49,46 +49,43 @@ export default function App() {
   useEffect(() => {
     let isCancelled = false;
 
-    const preloadAllFrames = async () => { // Fonksiyon adını preloadAllFrames olarak değiştirdik
-      const tempImages = Array(totalFrames).fill(null); // Tüm kareler için boş bir dizi oluştur
+    const preloadAllFrames = async () => {
+      const tempImages = Array(totalFrames).fill(null);
       const imageLoadPromises = [];
       let loadedCount = 0;
 
-      for (let i = 0; i < totalFrames; i++) { // <<< DEĞİŞTİRİLDİ: Tüm 135 kareyi yükle
+      for (let i = 0; i < totalFrames; i++) {
         if (isCancelled) return;
 
         const img = new Image();
         img.src = imagePath(i);
 
-        // Her resmin yüklenmesi ve çözümlenmesi (decode) için bir Promise oluştur
         const loadPromise = img.decode()
           .catch(() => { /* decode hatasını yoksay */ })
           .finally(() => {
             if (!isCancelled) {
-              tempImages[i] = img; // Yüklenen ve çözümlenen resmi doğru indekse yerleştir
+              tempImages[i] = img;
               loadedCount++;
-              // İlerleme çubuğu tüm karelerin yüklemesini yansıtacak (135 kare için)
               setProgress(Math.round((loadedCount / totalFrames) * 100));
             }
           });
         imageLoadPromises.push(loadPromise);
       }
 
-      // <<< DEĞİŞTİRİLDİ: Sadece tüm 135 görselin yüklenmesini/çözümlenmesini bekle
       await Promise.all(imageLoadPromises);
 
       if (!isCancelled) {
-        setImages(tempImages); // Tüm yüklenen ve çözümlenen kareleri state'e kaydet
-        setLoading(false); // Preloader'ı hemen kapat
+        setImages(tempImages);
+        setLoading(false);
       }
     };
 
-    preloadAllFrames(); // Tüm kareleri yükleme işlemini başlat
+    preloadAllFrames();
 
     return () => {
-      isCancelled = true; // Bileşen unmount edildiğinde veya effect yeniden çalıştığında yüklemeyi iptal et
+      isCancelled = true;
     };
-  }, []); // Yalnızca ilk mount
+  }, []);
 
   return (
     <DeviceProvider>
