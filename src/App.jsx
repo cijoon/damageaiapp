@@ -37,8 +37,7 @@ function MainContent({ images, loading, progress }) {
 
 export default function App() {
   const totalFrames = 135;
-  const initialFramesToLoad = 40; // Başlangıçta yüklenecek kare sayısı 40
-  // <<< DEĞİŞTİRİLDİ: imagePath fonksiyonu yeni dosya adlandırma formatına göre güncellendi
+  // <<< DEĞİŞTİRİLDİ: initialFramesToLoad kaldırıldı, tüm görseller yüklenecek
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result.webp`;
 
@@ -48,13 +47,13 @@ export default function App() {
 
   useEffect(() => {
     let isCancelled = false;
-    let loadedInitialCount = 0; // Başlangıç (ilk 40) kareleri için yüklenen sayacı
+    let loadedCount = 0; // Toplam yüklenen kare sayısı
 
-    const preloadInitialFrames = async () => {
-      const tempImages = [...images];
-      const initialImagePromises = [];
+    const preloadAllFrames = async () => {
+      const tempImages = Array(totalFrames).fill(null);
+      const imageLoadPromises = [];
 
-      for (let i = 0; i < initialFramesToLoad; i++) {
+      for (let i = 0; i < totalFrames; i++) { // Tüm kareler için döngü
         if (isCancelled) return;
 
         const img = new Image();
@@ -65,51 +64,29 @@ export default function App() {
           .finally(() => {
             if (!isCancelled) {
               tempImages[i] = img;
-              loadedInitialCount++;
-              setProgress(Math.round((loadedInitialCount / initialFramesToLoad) * 100));
+              loadedCount++;
+              // <<< DEĞİŞTİRİLDİ: Progress tüm karelerin yüklenmesini yansıtacak
+              setProgress(Math.round((loadedCount / totalFrames) * 100));
             }
           });
-        initialImagePromises.push(loadPromise);
+        imageLoadPromises.push(loadPromise);
       }
 
-      await Promise.all(initialImagePromises);
+      // Tüm görsellerin yüklenmesini/çözümlenmesini bekle
+      await Promise.all(imageLoadPromises);
 
       if (!isCancelled) {
         setImages(tempImages);
-        setLoading(false); // İlk 40 görsel yüklendikten sonra preloader'ı hemen kapat
-
-        preloadRemainingFrames(tempImages, loadedInitialCount); // Arka planda kalanları yükle
+        setLoading(false); // <<< DEĞİŞTİRİLDİ: Tüm görseller yüklendikten sonra preloader'ı kapat
       }
     };
 
-    const preloadRemainingFrames = async (currentImages, startingLoadedCount) => {
-      const tempImages = [...currentImages];
-
-      for (let i = startingLoadedCount; i < totalFrames; i++) {
-        if (isCancelled) return;
-
-        const img = new Image();
-        img.src = imagePath(i);
-
-        try {
-          await img.decode();
-        } catch (_) {
-          // Hata durumunda bile yer tutsun
-        }
-
-        tempImages[i] = img;
-        if (!isCancelled) {
-            setImages([...tempImages]);
-        }
-      }
-    };
-
-    preloadInitialFrames();
+    preloadAllFrames();
 
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, []); // Sadece ilk mount
 
   return (
     <DeviceProvider>
