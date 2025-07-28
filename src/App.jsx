@@ -38,7 +38,6 @@ function MainContent({ images, loading, progress }) {
 export default function App() {
   const totalFrames = 135;
   const initialFramesToLoad = 20; // İlk yüklenecek kare sayısı
-  const preloaderDelayAfterInitialLoad = 3000; // <<< YENİ EKLENDİ: Başlangıç yüklemesi bittikten sonra 3 saniye gecikme
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`; // .webp uzantısını kullanmayı unutmayın!
 
@@ -50,7 +49,7 @@ export default function App() {
 
   useEffect(() => {
     let isCancelled = false;
-    let loadedCount = 0; // Toplam yüklenen kare sayısı (initialFramesToLoad için)
+    let loadedCount = 0; // Toplam yüklenen kare sayısı
 
     const preloadInitialFrames = async () => {
       const tempImages = [...images]; // Mevcut images dizisinin bir kopyası
@@ -74,15 +73,9 @@ export default function App() {
 
       if (!isCancelled) {
         setImages(tempImages); // İlk yüklenen kareleri state'e kaydet
+        setLoading(false); // Preloader'ı kapat
 
-        // <<< BURAYI GÜNCELLEDİK: Preloader'ı kapatmadan önce 3 saniye gecikme
-        setTimeout(() => {
-          if (!isCancelled) { // Zamanlayıcı tetiklendiğinde bile iptal edilip edilmediğini kontrol et
-            setLoading(false); // Preloader'ı gecikmeden sonra kapat
-          }
-        }, preloaderDelayAfterInitialLoad); // Belirlenen gecikme süresi (3 saniye)
-
-        // Arka planda kalan resimleri yüklemeye hemen başla (gecikmeden etkilenmez)
+        // Arka planda kalan resimleri yüklemeye başla
         preloadRemainingFrames(tempImages, loadedCount);
       }
     };
@@ -104,7 +97,9 @@ export default function App() {
 
         tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
 
-        // Her bir kare yüklendikçe state'i güncelle
+        // Her bir kare yüklendikçe state'i güncelle (performans için batching yapabiliriz, şimdilik bu şekilde)
+        // Çok sık re-render'ı engellemek için her karede setImages yerine, belli aralıklarla veya sonda bir kez setImages yapmayı düşünebilirsiniz.
+        // Ancak bu örnekte her yüklenen karede güncelliyoruz ki ImageSequenceSection onu kullanabilsin.
         if (!isCancelled) {
             setImages([...tempImages]); // Yeni bir dizi oluşturarak state güncellemesini tetikle
         }
@@ -114,7 +109,7 @@ export default function App() {
     preloadInitialFrames();
 
     return () => {
-      isCancelled = true; // Bileşen unmount edildiğinde veya effect yeniden çalıştığında yüklemeyi iptal et
+      isCancelled = true;
     };
   }, []); // Yalnızca ilk mount
 
