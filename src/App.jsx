@@ -20,17 +20,17 @@ function MainContent({ images, loading, progress }) {
   return (
     <>
       <Header />
-      <main>
+     <main>
         <IntroSection />
-        {/* Sadece mobilde değilse ImageSequenceSection'ı göster */}
-        {!isMobile && <ImageSequenceSection images={images} />}
-        <FinalCaseStudies />
         {/* Mobilde PhilosophySection gösterilmeyecek */}
         {!isMobile && <PhilosophySection />}
+       <FinalCaseStudies />
+          {/* Sadece mobilde değilse ImageSequenceSection'ı göster */}
+        {!isMobile && <ImageSequenceSection images={images} />}       
         <PhoneShowcaseSection />
-        <ExperimentsSection />
-        <Footer />
-      </main>
+       <ExperimentsSection />
+       <Footer />
+     </main>
     </>
   );
 }
