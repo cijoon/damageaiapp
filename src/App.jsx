@@ -22,6 +22,7 @@ function MainContent({ images, loading, progress }) {
       <Header />
       <main>
         <IntroSection />
+        {/* Sadece mobilde değilse ImageSequenceSection'ı göster */}
         {!isMobile && <ImageSequenceSection images={images} />}
         <FinalCaseStudies />
         {/* Mobilde PhilosophySection gösterilmeyecek */}
@@ -36,50 +37,81 @@ function MainContent({ images, loading, progress }) {
 
 export default function App() {
   const totalFrames = 135;
+  const initialFramesToLoad = 20; // İlk yüklenecek kare sayısı
   const imagePath = (frame) =>
-    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
+    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`; // .webp uzantısını kullanmayı unutmayın!
 
-  const [images, setImages] = useState([]);
+  // images state'ini artık doğrudan Image nesneleri dizisi olarak değil,
+  // her kare için bir Image nesnesi veya null/undefined içeren bir dizi olarak başlatıyoruz.
+  const [images, setImages] = useState(Array(totalFrames).fill(null));
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0); // % göstergesi
 
   useEffect(() => {
     let isCancelled = false;
+    let loadedCount = 0; // Toplam yüklenen kare sayısı
 
-    const preload = async () => {
-      const loadedImages = [];
-      for (let i = 0; i < totalFrames; i++) {
+    const preloadInitialFrames = async () => {
+      const tempImages = [...images]; // Mevcut images dizisinin bir kopyası
+
+      for (let i = 0; i < initialFramesToLoad; i++) {
         if (isCancelled) return;
 
         const img = new Image();
         img.src = imagePath(i);
 
-        // decode() bazı tarayıcılarda hata atabilir; güvenli yakala
         try {
           await img.decode();
         } catch (_) {
-          // ignore decode error; yine de push et
+          // Hata durumunda bile push et, resim bozuksa bile yer tutsun
         }
 
-        loadedImages.push(img);
-
-        // progress güncelle
-        const pct = ((i + 1) / totalFrames) * 100;
-        setProgress(pct);
+        tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
+        loadedCount++;
+        setProgress(Math.round((loadedCount / initialFramesToLoad) * 100)); // Preloader sadece başlangıç karelerini gösterecek
       }
 
       if (!isCancelled) {
-        setImages(loadedImages);
-        setLoading(false);
+        setImages(tempImages); // İlk yüklenen kareleri state'e kaydet
+        setLoading(false); // Preloader'ı kapat
+
+        // Arka planda kalan resimleri yüklemeye başla
+        preloadRemainingFrames(tempImages, loadedCount);
       }
     };
 
-    preload();
+    const preloadRemainingFrames = async (currentImages, startingLoadedCount) => {
+      const tempImages = [...currentImages]; // Güncel images dizisinin bir kopyası
+
+      for (let i = startingLoadedCount; i < totalFrames; i++) {
+        if (isCancelled) return;
+
+        const img = new Image();
+        img.src = imagePath(i);
+
+        try {
+          await img.decode();
+        } catch (_) {
+          // Hata durumunda bile yer tutsun
+        }
+
+        tempImages[i] = img; // Yüklenen resmi doğru indekse yerleştir
+
+        // Her bir kare yüklendikçe state'i güncelle (performans için batching yapabiliriz, şimdilik bu şekilde)
+        // Çok sık re-render'ı engellemek için her karede setImages yerine, belli aralıklarla veya sonda bir kez setImages yapmayı düşünebilirsiniz.
+        // Ancak bu örnekte her yüklenen karede güncelliyoruz ki ImageSequenceSection onu kullanabilsin.
+        if (!isCancelled) {
+            setImages([...tempImages]); // Yeni bir dizi oluşturarak state güncellemesini tetikle
+        }
+      }
+    };
+
+    preloadInitialFrames();
 
     return () => {
       isCancelled = true;
     };
-  }, []); // yalnızca ilk mount
+  }, []); // Yalnızca ilk mount
 
   return (
     <DeviceProvider>

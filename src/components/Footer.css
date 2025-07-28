@@ -1,3 +1,4 @@
+/* DOSYA ADI: src/components/Footer.css */
 .footer-container {
   display: flex;
   justify-content: space-between;
@@ -14,7 +15,7 @@
   flex-direction: column;
   align-items: flex-end; /* Align logo and text to right */
   flex: 1;
-  transform: translateY(-2cm); /* already moving logo up */
+  transform: translate(200px, -2cm); /* Desktop için sağa ve yukarı kaydırır */
 }
 
 .footer-logo img {
@@ -28,7 +29,7 @@
   gap: 1.2rem;
   align-items: flex-start;
   flex: 2;
-  transform: translate(2cm, -2cm); /* 👈 Move contact block right + up */
+  transform: translate(2cm, -2cm); /* İletişim bloğunu sağa ve yukarı kaydırır */
 }
 
 .footer-item {
@@ -60,3 +61,42 @@
   text-align: right;
 }
 
+/* --- Mobil Görünüm İçin Medya Sorgusu --- */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column; /* Öğeleri dikey olarak sırala */
+    align-items: flex-start; /* Tüm öğeleri sola hizala */
+    padding: 1rem; /* Mobil için daha az iç boşluk */
+    gap: 1.5rem; /* Öğeler arası boşluğu azalt */
+    max-width: 100%; /* Tam genişliği kullan */
+  }
+
+  .footer-contacts {
+    width: 100%; /* Mobil'de tam genişliği kapla */
+    transform: none; /* Desktop'taki transform'u iptal et */
+    align-items: flex-start; /* Kontak öğelerini sola hizala */
+    order: 2; /* İsteğe bağlı: Logodan sonra gelmesini sağlar */
+  }
+
+  .footer-logo {
+    width: 100%; /* Mobil'de tam genişliği kapla */
+    transform: none; /* Desktop'taki transform'u iptal et */
+    align-items: flex-start; /* Logo ve copyright'ı sola hizala */
+    order: 1; /* İsteğe bağlı: Kontaklardan önce gelmesini sağlar */
+    margin-bottom: 1rem; /* Logo ve kontak arasında boşluk bırak */
+  }
+
+  .footer-logo img {
+    margin-bottom: 0.5rem; /* Logo ile copyright metni arasına boşluk */
+  }
+
+  .footer-copyright {
+    text-align: left; /* Telif hakkı metnini sola hizala */
+  }
+
+  .footer-item {
+    /* Adres metninin otomatik sarmalanması için özel bir ayara gerek yoktur,
+       çünkü flex konteyner içinde zaten doğal olarak sarılır. */
+    max-width: 100%; /* Öğenin tam genişliği kullanmasını sağlayarak metnin sığmasını kolaylaştırır */
+  }
+}

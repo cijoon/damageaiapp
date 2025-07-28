@@ -67,24 +67,24 @@
 }
 
 /* Başlık, alt başlık vb. stiller aynı kalabilir... */
-.showcase-title { 
-  font-size: clamp(3rem, 6vw, 5rem); 
-  font-family: var(--heading-font); 
-  margin-bottom: 1rem; 
-  text-align: left; /* BURAYI DEĞİŞTİRDİK */
+.showcase-title {
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-family: var(--heading-font);
+  margin-bottom: 1rem;
+  text-align: left;
 }
-.showcase-subtitle { 
-  font-size: clamp(1rem, 2vw, 1.5rem); 
-  font-family: var(--heading-font); 
-  color: var(--accent-teal); 
-  margin-bottom: 2rem; 
-  text-align: left; /* BURAYI DEĞİŞTİRDİK */
+.showcase-subtitle {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-family: var(--heading-font);
+  color: var(--accent-teal);
+  margin-bottom: 2rem;
+  text-align: left;
 }
-.showcase-description { 
-  font-size: 1rem; 
-  line-height: 1.7; 
-  max-width: 45ch; 
-  text-align: left; /* BURAYI DEĞİŞTİRDİK */
+.showcase-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 45ch;
+  text-align: left;
 }
 
 /* Sağ Sütun Stilleri */
@@ -125,8 +125,7 @@
 .showcase-title,
 .showcase-subtitle,
 .showcase-description {
-  opacity: 1; /* BURAYI DEĞİŞTİRDİK: 100 yerine 1 */
-  /* text-align: center; <--- Buradaki 'text-align: center;' kaldırıldı çünkü yukarıdaki spesifik kurallara taşındı */
+  opacity: 0; /* Bu kuralı koruyalım, çünkü animasyonun başlangıç noktası bu */
 }
 
 .ps-animate .showcase-title,
@@ -201,18 +200,25 @@
     margin-right: 12px;
     padding: 16px 12px;
   }
+  /* <<< BURAYI GÜNCELLEDİK: Mobil'de yazıların opaklığını sıfırlayan kuralı geçersiz kılın */
+  .phone-mobile-content .showcase-title,
+  .phone-mobile-content .showcase-subtitle,
+  .phone-mobile-content .showcase-description {
+    opacity: 1; /* Mobil'de her zaman görünür olsun */
+    /* Aşağıdaki kurallar zaten mevcuttu, sadece mobil özel stil olarak bırakıyoruz */
+    text-align: left;
+  }
+
   .phone-mobile-content .showcase-title {
     font-size: 1.2rem;
     margin-bottom: 4px;
     color: #fff;
-    text-align: left; /* Mobil görünümde de sola hizalı olsun */
   }
   .phone-mobile-content .showcase-subtitle {
     color: #fff;
     font-size: 1rem;
     margin-bottom: 8px;
     display: block;
-    text-align: left; /* Mobil görünümde de sola hizalı olsun */
   }
   .phone-mobile-content .showcase-description {
     color: #fff !important;
@@ -220,6 +226,5 @@
     background: none;
     margin: 0 0 8px 0;
     padding: 0;
-    text-align: left; /* Mobil görünümde de sola hizalı olsun */
   }
 }
