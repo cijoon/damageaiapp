@@ -1,35 +1,22 @@
 // src/components/LoadingScreen/LoadingScreen.jsx
-import React, { useState, useEffect } from 'react';
-import './LoadingScreen.css'; // Stil dosyamızı ekleyeceğiz
+import React, { useState, useEffect, useRef } from 'react';
+import './LoadingScreen.css';
 
-const LoadingScreen = ({ onLoadingComplete }) => {
-  const [progress, setProgress] = useState(0);
+// progress prop'unu ekledik
+const LoadingScreen = ({ onLoadingComplete, progress }) => {
+  // progress artık dışarıdan geliyor, kendi iç state'i değil
+  // const [progress, setProgress] = useState(0); // Bu satırı kaldır
 
   useEffect(() => {
-    const duration = 17000; // 5 saniye - Burası hala 5000 ms (5 saniye)
-    const intervalTime = 50; // Her 50 ms'de bir güncelle
-
-    const increment = (100 * intervalTime) / duration; // Her adımda ne kadar ilerleyecek
-
-    const interval = setInterval(() => {
-      setProgress((prevProgress) => {
-        const newProgress = prevProgress + increment;
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          onLoadingComplete(); // Yükleme tamamlandığında çağrılacak fonksiyon
-          return 100;
-        }
-        return newProgress;
-      });
-    }, intervalTime);
-
-    // Bileşen kapatıldığında interval'ı temizle
-    return () => clearInterval(interval);
-  }, [onLoadingComplete]);
+    // Burada artık kendi zamanlayıcımız yok, progress dışarıdan geliyor.
+    // Dışarıdan gelen progress %100 olduğunda onLoadingComplete çağrılacak.
+    if (progress >= 100) {
+      onLoadingComplete();
+    }
+  }, [progress, onLoadingComplete]); // progress değiştikçe useEffect tetiklensin
 
   return (
     <div className="loading-screen-overlay">
-      {/* Arka plan görseli burada */}
       <img src="/loading.webp" alt="Loading Background" className="loading-background-image" />
 
       <div className="loading-content">
