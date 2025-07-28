@@ -1,7 +1,8 @@
 // DOSYA ADI: src/App.jsx
 
 import React, { useState, useEffect } from 'react';
-// import Preloader from './components/Preloader'; // Preloader kaldırıldı
+import LoadingScreen from './components/LoadingScreen/LoadingScreen'; // LoadingScreen bileşenini ekledik
+
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
 import PhilosophySection from './components/PhilosophySection/PhilosophySection';
@@ -12,22 +13,17 @@ import ExperimentsSection from './components/ExperimentsSection';
 import Footer from './components/Footer';
 import { DeviceProvider, useDevice } from "./contexts/DeviceContext";
 
-// MainContent bileşenindeki loading ve progress props'ları kaldırıldı
-function MainContent({ images }) { // Props güncellendi
+function MainContent({ images }) {
   const { isMobile } = useDevice();
-  // Preloader kaldırıldığı için bu koşul kaldırıldı
-  // if (loading && !isMobile) {
-  //   return <Preloader progress={progress} />;
-  // }
   return (
     <>
       <Header />
       <main>
         <IntroSection />
-        {/* Sadece mobilde değilse ImageSequenceSection'ı göster - Kullanıcının istediği sıraya göre düzenlendi */}
+        {/* Sadece mobilde değilse ImageSequenceSection'ı göster */}
         {!isMobile && <ImageSequenceSection images={images} />}
         <FinalCaseStudies />
-        {/* Mobilde PhilosophySection gösterilmeyecek - Kullanıcının istediği sıraya göre düzenlendi */}
+        {/* Mobilde PhilosophySection gösterilmeyecek */}
         {!isMobile && <PhilosophySection />}
         <PhoneShowcaseSection />
         <ExperimentsSection />
@@ -39,24 +35,22 @@ function MainContent({ images }) { // Props güncellendi
 
 export default function App() {
   const totalFrames = 135;
-  // <<< DEĞİŞTİRİLDİ: imagePath fonksiyonu "Pre-comp 1_00134.webp" formatına döndürüldü
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
 
   const [images, setImages] = useState(Array(totalFrames).fill(null));
-  // <<< KALDIRILDI: loading ve progress state'leri kaldırıldı
-  // const [loading, setLoading] = useState(true);
-  // const [progress, setProgress] = useState(0);
+  // Yükleme ekranının görünürlüğünü kontrol eden yeni state
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
 
   useEffect(() => {
     let isCancelled = false;
-    let loadedCount = 0; // Toplam yüklenen kare sayısı
+    let loadedCount = 0;
 
     const preloadAllFrames = async () => {
       const tempImages = Array(totalFrames).fill(null);
       const imageLoadPromises = [];
 
-      for (let i = 0; i < totalFrames; i++) { // Tüm kareler için döngü
+      for (let i = 0; i < totalFrames; i++) {
         if (isCancelled) return;
 
         const img = new Image();
@@ -68,20 +62,19 @@ export default function App() {
             if (!isCancelled) {
               tempImages[i] = img;
               loadedCount++;
-              // <<< KALDIRILDI: setProgress çağrısı kaldırıldı
-              // setProgress(Math.round((loadedCount / totalFrames) * 100));
+              // Resim yükleme ilerlemesini burada takip edebilirsiniz ama
+              // loading ekranı süresinden bağımsız olacaktır.
             }
           });
         imageLoadPromises.push(loadPromise);
       }
 
-      // Tüm görsellerin yüklenmesini/çözümlenmesini bekle
       await Promise.all(imageLoadPromises);
 
       if (!isCancelled) {
         setImages(tempImages);
-        // <<< KALDIRILDI: setLoading çağrısı kaldırıldı
-        // setLoading(false); // Tüm görseller yüklendikten sonra preloader'ı kapat
+        // Resimler yüklense bile, loading ekranının 5 saniye beklemesini sağlayacağız.
+        // Bu yüzden burada doğrudan setShowLoadingScreen(false) demiyoruz.
       }
     };
 
@@ -90,12 +83,21 @@ export default function App() {
     return () => {
       isCancelled = true;
     };
-  }, []); // Sadece ilk mount
+  }, []);
+
+  // LoadingScreen bileşeninin 5 saniye sonra kendini tamamlaması için bir callback fonksiyonu
+  const handleLoadingScreenComplete = () => {
+    setShowLoadingScreen(false); // 5 saniye dolduğunda loading ekranını gizle
+  };
 
   return (
     <DeviceProvider>
-      {/* <<< DEĞİŞTİRİLDİ: MainContent'e loading ve progress props'ları geçirilmiyor */}
-      <MainContent images={images} />
+      {showLoadingScreen && (
+        <LoadingScreen onLoadingComplete={handleLoadingScreenComplete} />
+      )}
+      {!showLoadingScreen && (
+        <MainContent images={images} />
+      )}
     </DeviceProvider>
   );
 }
