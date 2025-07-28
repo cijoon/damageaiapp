@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Preloader from './components/Preloader';
 import Header from './components/Header';
-import IntroSection from './components/IntroSection'; // <<< HATA DÜZELTİLDİ: Introloader yerine IntroSection
+import IntroSection from './components/IntroSection';
 import PhilosophySection from './components/PhilosophySection/PhilosophySection';
 import FinalCaseStudies from './components/FinalCaseStudies/FinalCaseStudies';
 import PhoneShowcaseSection from './components/PhoneShowcaseSection';
@@ -37,8 +37,6 @@ function MainContent({ images, loading, progress }) {
 
 export default function App() {
   const totalFrames = 135;
-  // initialFramesToLoad kaldırıldı, çünkü artık tüm 135 kareyi baştan yükleyeceğiz.
-  // preloaderMinimumDisplayTime (3 saniye gecikme) özelliği kaldırıldı.
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
 
@@ -66,7 +64,21 @@ export default function App() {
             if (!isCancelled) {
               tempImages[i] = img;
               loadedCount++;
-              setProgress(Math.round((loadedCount / totalFrames) * 100));
+
+              // <<< DEĞİŞTİRİLDİ: İlerleme çubuğu mantığı
+              const actualProgress = (loadedCount / totalFrames) * 100;
+              let displayProgress;
+
+              if (loadedCount < totalFrames) { // Tüm görseller henüz yüklenmediyse
+                  // Gerçek ilerlemeyi %70'e oranla ölçeklendir
+                  // Örn: gerçek ilerleme %50 ise, gösterilen %35 olur (%50 * 0.70)
+                  displayProgress = Math.round(actualProgress * 0.70);
+                  // Ancak gösterilen ilerleme %70'i geçemez, böylece "bekleme" efekti oluşur
+                  displayProgress = Math.min(displayProgress, 70); 
+              } else { // Tüm görseller yüklendiğinde
+                  displayProgress = 100; // İlerleme çubuğunu %100'e tamamla
+              }
+              setProgress(displayProgress);
             }
           });
         imageLoadPromises.push(loadPromise);
