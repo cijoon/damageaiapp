@@ -1,6 +1,6 @@
 // DOSYA ADI: src/App.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Preloader from './components/Preloader';
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
@@ -44,13 +44,17 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0); // % göstergesi
 
+  const allImagesActuallyLoaded = useRef(false);
+  const animationFrameId = useRef(null);
+  const startTimeRef = useRef(null);
+
   useEffect(() => {
     let isCancelled = false;
+    let loadedCount = 0;
 
     const preloadAllFrames = async () => {
       const tempImages = Array(totalFrames).fill(null);
       const imageLoadPromises = [];
-      let loadedCount = 0;
 
       for (let i = 0; i < totalFrames; i++) {
         if (isCancelled) return;
@@ -64,30 +68,45 @@ export default function App() {
             if (!isCancelled) {
               tempImages[i] = img;
               loadedCount++;
-
-              // <<< DEĞİŞTİRİLDİ: İlerleme çubuğu mantığı
-              const actualProgress = (loadedCount / totalFrames) * 100;
-              let displayProgress;
-
-              if (loadedCount < totalFrames) { // Tüm görseller henüz yüklenmediyse
-                  // Gerçek ilerlemeyi %70'e oranla ölçeklendir
-                  // Örn: gerçek ilerleme %50 ise, gösterilen %35 olur (%50 * 0.70)
-                  displayProgress = Math.round(actualProgress * 0.70);
-                  // Ancak gösterilen ilerleme %70'i geçemez, böylece "bekleme" efekti oluşur
-                  displayProgress = Math.min(displayProgress, 70); 
-              } else { // Tüm görseller yüklendiğinde
-                  displayProgress = 100; // İlerleme çubuğunu %100'e tamamla
+              if (loadedCount === totalFrames) {
+                allImagesActuallyLoaded.current = true;
               }
-              setProgress(displayProgress);
             }
           });
         imageLoadPromises.push(loadPromise);
       }
 
+      const animateProgress = (currentTime) => {
+        if (!startTimeRef.current) {
+          startTimeRef.current = currentTime;
+        }
+        const elapsed = currentTime - startTimeRef.current;
+
+        // <<< DEĞİŞTİRİLDİ: Progress barın %80'e ulaşması için 4 saniyelik bir süre belirlendi
+        const durationTo80Percent = 4000; // milliseconds
+
+        let calculatedTimedProgress = Math.min((elapsed / durationTo80Percent) * 80, 80);
+
+        if (allImagesActuallyLoaded.current) {
+          setProgress(100);
+          cancelAnimationFrame(animationFrameId.current);
+        } else if (calculatedTimedProgress < 80) {
+          setProgress(Math.round(calculatedTimedProgress));
+          animationFrameId.current = requestAnimationFrame(animateProgress);
+        } else {
+          setProgress(80);
+          animationFrameId.current = requestAnimationFrame(animateProgress);
+        }
+      };
+
+      animationFrameId.current = requestAnimationFrame(animateProgress);
+
       await Promise.all(imageLoadPromises);
 
       if (!isCancelled) {
         setImages(tempImages);
+        setProgress(100);
+        cancelAnimationFrame(animationFrameId.current);
         setLoading(false);
       }
     };
@@ -96,6 +115,9 @@ export default function App() {
 
     return () => {
       isCancelled = true;
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
     };
   }, []);
 
