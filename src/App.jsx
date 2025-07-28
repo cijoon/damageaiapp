@@ -1,7 +1,7 @@
 // DOSYA ADI: src/App.jsx
 
 import React, { useState, useEffect } from 'react';
-import Preloader from './components/Preloader';
+// import Preloader from './components/Preloader'; // Preloader kaldırıldı
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
 import PhilosophySection from './components/PhilosophySection/PhilosophySection';
@@ -12,20 +12,22 @@ import ExperimentsSection from './components/ExperimentsSection';
 import Footer from './components/Footer';
 import { DeviceProvider, useDevice } from "./contexts/DeviceContext";
 
-function MainContent({ images, loading, progress }) {
+// MainContent bileşenindeki loading ve progress props'ları kaldırıldı
+function MainContent({ images }) { // Props güncellendi
   const { isMobile } = useDevice();
-  if (loading && !isMobile) {
-    return <Preloader progress={progress} />;
-  }
+  // Preloader kaldırıldığı için bu koşul kaldırıldı
+  // if (loading && !isMobile) {
+  //   return <Preloader progress={progress} />;
+  // }
   return (
     <>
       <Header />
       <main>
         <IntroSection />
-        {/* Sadece mobilde değilse ImageSequenceSection'ı göster */}
+        {/* Sadece mobilde değilse ImageSequenceSection'ı göster - Kullanıcının istediği sıraya göre düzenlendi */}
         {!isMobile && <ImageSequenceSection images={images} />}
         <FinalCaseStudies />
-        {/* Mobilde PhilosophySection gösterilmeyecek */}
+        {/* Mobilde PhilosophySection gösterilmeyecek - Kullanıcının istediği sıraya göre düzenlendi */}
         {!isMobile && <PhilosophySection />}
         <PhoneShowcaseSection />
         <ExperimentsSection />
@@ -37,13 +39,14 @@ function MainContent({ images, loading, progress }) {
 
 export default function App() {
   const totalFrames = 135;
-  // <<< DEĞİŞTİRİLDİ: imagePath fonksiyonu yeni dosya adlandırma formatına göre güncellendi (ek _result)
+  // <<< DEĞİŞTİRİLDİ: imagePath fonksiyonu "Pre-comp 1_00134.webp" formatına döndürüldü
   const imagePath = (frame) =>
-    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result_result.webp`;
+    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
 
   const [images, setImages] = useState(Array(totalFrames).fill(null));
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0); // % göstergesi
+  // <<< KALDIRILDI: loading ve progress state'leri kaldırıldı
+  // const [loading, setLoading] = useState(true);
+  // const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     let isCancelled = false;
@@ -65,7 +68,8 @@ export default function App() {
             if (!isCancelled) {
               tempImages[i] = img;
               loadedCount++;
-              setProgress(Math.round((loadedCount / totalFrames) * 100));
+              // <<< KALDIRILDI: setProgress çağrısı kaldırıldı
+              // setProgress(Math.round((loadedCount / totalFrames) * 100));
             }
           });
         imageLoadPromises.push(loadPromise);
@@ -76,7 +80,8 @@ export default function App() {
 
       if (!isCancelled) {
         setImages(tempImages);
-        setLoading(false); // Tüm görseller yüklendikten sonra preloader'ı kapat
+        // <<< KALDIRILDI: setLoading çağrısı kaldırıldı
+        // setLoading(false); // Tüm görseller yüklendikten sonra preloader'ı kapat
       }
     };
 
@@ -89,7 +94,8 @@ export default function App() {
 
   return (
     <DeviceProvider>
-      <MainContent images={images} loading={loading} progress={progress} />
+      {/* <<< DEĞİŞTİRİLDİ: MainContent'e loading ve progress props'ları geçirilmiyor */}
+      <MainContent images={images} />
     </DeviceProvider>
   );
 }
