@@ -1,11 +1,11 @@
 // DOSYA ADI: src/App.jsx
 
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-// import LoadingScreen from './components/LoadingScreen/LoadingScreen.jsx'; // LoadingScreen devre dışı bırakıldı
+import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
-import ImageSequenceSection from './components/ImageSequenceSection'; // ImageSequenceSection'ı import et
+import ImageSequenceSection from './components/ImageSequenceSection';
 
 // Diğer ağır bileşenleri lazy yüklüyoruz
 const LazyPhilosophySection = lazy(() => import('./components/PhilosophySection/PhilosophySection'));
@@ -14,20 +14,22 @@ const LazyPhoneShowcaseSection = lazy(() => import('./components/PhoneShowcaseSe
 const LazyExperimentsSection = lazy(() => import('./components/ExperimentsSection'));
 const LazyFooter = lazy(() => import('./components/Footer'));
 
-import { DeviceProvider, useDevice } from "./contexts/DeviceContext"; // DeviceProvider import'ını kontrol ettik
+import { DeviceProvider, useDevice } from "./contexts/DeviceContext";
 
 
-// MainContent bileşeni - artık dışarıda koşullu render etmiyoruz,
-// içindeki bileşenler kendi mobil render kararlarını verecek
-// MainContent bileşeni
+// MainContent bileşeni (DEĞİŞİKLİK YOK - Daha önceki son halini kullanıyoruz)
 function MainContent({ images, onMobileStatusChange, onVideoReady, introSectionRef }) {
- const { isMobile } = useDevice();
+ const { isMobile } = useDevice(); // MainContent hala isMobile'ı kendi içinde kullanıyor
 
  useEffect(() => {
-   if (onMobileStatusChange) {
-     onMobileStatusChange(isMobile);
+   // Bu callback artık AppContent'teki isMobileDetected state'ini güncellemeyecek
+   // MainContent içinde DeviceContext'ten isMobile'ı kullanmak yeterli.
+   // Eğer App'e (şimdiki AppContent'e) isMobile bilgisini taşımak istenseydi, bu callback kullanılabilirdi.
+   // Ancak şu anki yapıda AppContent doğrudan useDevice'ı kullandığı için buna gerek kalmıyor.
+   if (onMobileStatusChange) { // Eğer bir dış bileşene mobil durumu bildirmek gerekirse kalabilir.
+     onMobileStatusChange(isMobile); // Şimdiki AppContent için bu artık gerekli değil, silinebilir
    }
- }, [isMobile, onMobileStatusChange]);
+ }, [isMobile, onMobileStatusChange]); // onMobileStatusChange prop'u artık AppContent'ten gelmiyor
 
  return (
    <>
@@ -65,37 +67,40 @@ function MainContent({ images, onMobileStatusChange, onVideoReady, introSectionR
 }
 
 
-export default function App() {
+// YENİ: Uygulamanın ana mantığını içeren bileşen
+function AppContent() {
+  // useDevice hook'unu burada doğrudan kullanabiliriz çünkü DeviceProvider üstte sarıyor.
+  const { isMobile } = useDevice(); // Mobil durumunu buradan alıyoruz
+
   const totalFrames = 135;
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result.webp`;
 
 
   const [preloadedImageSequenceImages, setPreloadedImageSequenceImages] = useState(Array(totalFrames).fill(null));
-  // const [imageSequenceLoadProgress, setImageSequenceLoadProgress] = useState(0); // Loading screen kalktığı için progress tutmaya gerek yok
+  // isMobileDetected state'i artık gerekli değil, isMobile doğrudan kullanılıyor.
+  // const [isMobileDetected, setIsMobileDetected] = useState(false);
 
-  // const [showLoadingScreen, setShowLoadingScreen] = useState(true); // Loading screen kalktığı için kaldırıldı
-  const [isMobileDetected, setIsMobileDetected] = useState(false); // Mobile algılama state'i
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
 
   const mainVideoRef = useRef(null);
   const introSectionMainRef = useRef(null);
 
-  const handleMobileStatusChange = (status) => {
-    setIsMobileDetected(status);
-  };
+  // handleMobileStatusChange callback'i AppContent'e taşındığı için gerek kalmadı.
+  // const handleMobileStatusChange = (status) => {
+  //   setIsMobileDetected(status);
+  // };
 
   const handleMainVideoReady = (videoElement) => {
     mainVideoRef.current = videoElement;
     if (mainVideoRef.current) {
-      // Mobilde video anında oynatılabilir olmalı, otomatik oynatma denemesi
-      // Masaüstünde ise hala intro video manuel kontrol edilebilir.
-      if (isMobileDetected) {
+      // isMobileDetected yerine doğrudan isMobile kullanılıyor
+      if (isMobile) {
           const playPromise = mainVideoRef.current.play();
           if (playPromise !== undefined) {
               playPromise.then(() => {
                   // Video başarıyla oynatılmaya başlandı
               }).catch(error => {
-                  // Otomatik oynatma engellendi, kullanıcı etkileşimi gerekebilir
                   console.warn("Mobilde video otomatik oynatılamadı, kullanıcı etkileşimi gerekebilir:", error);
               });
           }
@@ -107,11 +112,6 @@ export default function App() {
   };
 
   useEffect(() => {
-    // Mobil veya masaüstü fark etmeksizin, ImageSequenceSection resimlerini arkada yükle.
-    // Artık loading ekranı olmadığı için, bu yükleme işlemi tamamen arkaplanda olacak.
-    // Yalnızca isMobileDetected false (masaüstü) ise ImageSequenceSection render edilecek,
-    // ancak preload işlemi her zaman başlatılabilir.
-
     let isCancelled = false;
     let loadedCount = 0;
 
@@ -130,7 +130,6 @@ export default function App() {
             if (!isCancelled) {
               tempImages[i] = img;
               loadedCount++;
-              // setImageSequenceLoadProgress(Math.floor((loadedCount / totalFrames) * 100)); // Loading screen yok
               resolve();
             } else {
               reject(new Error("Yükleme iptal edildi"));
@@ -141,7 +140,6 @@ export default function App() {
             if (!isCancelled) {
                tempImages[i] = null;
                loadedCount++;
-               // setImageSequenceLoadProgress(Math.floor((loadedCount / totalFrames) * 100)); // Loading screen yok
                resolve();
             } else {
                reject(new Error("Yükleme iptal edildi"));
@@ -155,40 +153,55 @@ export default function App() {
 
       if (!isCancelled) {
         setPreloadedImageSequenceImages(tempImages);
-        // setShowLoadingScreen(false); // Loading screen yok
       }
     };
 
-    // Siteye girildiğinde preload işlemini başlat (mobil olup olmadığına bakılmaksızın)
-    // Ancak App'teki isMobileDetected state'ini useEffect bağımlılıklarına eklemeyelim,
-    // çünkü preload'un sadece bir kez başlamasını istiyoruz.
     preloadImageSequenceAssets();
 
     return () => {
       isCancelled = true;
     };
-  }, []); // Bağımlılık dizisi boş, bu useEffect sadece bir kez çalışacak.
+  }, []);
 
-  // handleLoadingScreenComplete artık loading screen olmadığı için gereksiz.
-  // Onun yerine, video hazır olduğunda veya mobilse otomatik oynatma mantığı handleMainVideoReady'ye taşındı.
+  // Yükleme ekranı zamanlayıcısı: sadece mobil değilse çalışacak
+  useEffect(() => {
+    if (!isMobile) { // Sadece masaüstü ise 3 saniyelik zamanlayıcıyı başlat
+        const timer = setTimeout(() => {
+            setShowLoadingScreen(false);
+        }, 3000);
+        return () => clearTimeout(timer);
+    } else {
+        // Mobil ise, yükleme ekranını hemen gizle (hiç gösterme)
+        setShowLoadingScreen(false);
+    }
+  }, [isMobile]); // isMobile bağımlılığı, mobil durum değiştiğinde (ilk tespit edildiğinde) tetikler
+
 
   return (
-    <DeviceProvider>
-      {/* LoadingScreen tamamen kaldırıldı */}
-      {/* {!isMobileDetected && showLoadingScreen && (
-        <LoadingScreen
-          onLoadingComplete={handleLoadingScreenComplete}
-          progress={imageSequenceLoadProgress}
-        />
-      )} */}
+    <>
+      {/* Yükleme ekranı sadece showLoadingScreen true VE mobil değilse render edilecek */}
+      {showLoadingScreen && !isMobile && <LoadingScreen />}
 
-      {/* MainContent her zaman render ediliyor */}
-      <MainContent
-        images={preloadedImageSequenceImages}
-        onMobileStatusChange={handleMobileStatusChange}
-        onVideoReady={handleMainVideoReady}
-        introSectionRef={introSectionMainRef}
-      />
+      {/* Ana içerik, showLoadingScreen false olduğunda render edilecek.
+          Mobil ise, showLoadingScreen hemen false olacağı için MainContent anında görünür.
+          Masaüstü ise, 3 saniye sonra MainContent görünür. */}
+      {!showLoadingScreen && (
+        <MainContent
+          images={preloadedImageSequenceImages}
+          // onMobileStatusChange prop'u artık AppContent'ten gönderilmiyor
+          onVideoReady={handleMainVideoReady}
+          introSectionRef={introSectionMainRef}
+        />
+      )}
+    </>
+  );
+}
+
+// Orijinal App export'u şimdi DeviceProvider'ı sarıyor
+export default function App() {
+  return (
+    <DeviceProvider>
+      <AppContent /> {/* Tüm uygulama mantığı burada */}
     </DeviceProvider>
   );
 }
