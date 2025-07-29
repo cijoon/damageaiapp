@@ -1,12 +1,15 @@
 // DOSYA ADI: src/App.jsx
+// ImageSequenceSection ve ilgili tüm kodlar kaldırıldı.
 
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
-
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
-import ImageSequenceSection from './components/ImageSequenceSection';
-import ReactGA from "react-ga4";
+// import ImageSequenceSection from './components/ImageSequenceSection'; // <-- KALDIRILDI
+
+// Google Analytics'i index.html üzerinden eklediğiniz için bu satırlara gerek kalmadı.
+// import ReactGA from "react-ga4"; // <-- KALDIRILDI
+
 // Diğer ağır bileşenleri lazy yüklüyoruz
 const LazyPhilosophySection = lazy(() => import('./components/PhilosophySection/PhilosophySection'));
 const LazyFinalCaseStudies = lazy(() => import('./components/FinalCaseStudies/FinalCaseStudies'));
@@ -17,19 +20,9 @@ const LazyFooter = lazy(() => import('./components/Footer'));
 import { DeviceProvider, useDevice } from "./contexts/DeviceContext";
 
 
-// MainContent bileşeni (DEĞİŞİKLİK YOK - Daha önceki son halini kullanıyoruz)
-function MainContent({ images, onMobileStatusChange, onVideoReady, introSectionRef }) {
- const { isMobile } = useDevice(); // MainContent hala isMobile'ı kendi içinde kullanıyor
-
- useEffect(() => {
-   // Bu callback artık AppContent'teki isMobileDetected state'ini güncellemeyecek
-   // MainContent içinde DeviceContext'ten isMobile'ı kullanmak yeterli.
-   // Eğer App'e (şimdiki AppContent'e) isMobile bilgisini taşımak istenseydi, bu callback kullanılabilirdi.
-   // Ancak şu anki yapıda AppContent doğrudan useDevice'ı kullandığı için buna gerek kalmıyor.
-   if (onMobileStatusChange) { // Eğer bir dış bileşene mobil durumu bildirmek gerekirse kalabilir.
-     onMobileStatusChange(isMobile); // Şimdiki AppContent için bu artık gerekli değil, silinebilir
-   }
- }, [isMobile, onMobileStatusChange]); // onMobileStatusChange prop'u artık AppContent'ten gelmiyor
+// MainContent bileşeni, gereksiz proplar temizlendi.
+function MainContent({ onVideoReady, introSectionRef }) {
+ const { isMobile } = useDevice();
 
  return (
    <>
@@ -47,8 +40,7 @@ function MainContent({ images, onMobileStatusChange, onVideoReady, introSectionR
          <LazyFinalCaseStudies />
        </Suspense>
 
-       {/* ImageSequenceSection burada */}
-       {!isMobile && <ImageSequenceSection images={images} />}
+       {/* ImageSequenceSection buradan kaldırıldı */}
 
        <Suspense fallback={<div>Loading showcase...</div>}>
          <LazyPhoneShowcaseSection />
@@ -67,40 +59,27 @@ function MainContent({ images, onMobileStatusChange, onVideoReady, introSectionR
 }
 
 
-// YENİ: Uygulamanın ana mantığını içeren bileşen
+// Uygulamanın ana mantığını içeren bileşen
 function AppContent() {
-  // useDevice hook'unu burada doğrudan kullanabiliriz çünkü DeviceProvider üstte sarıyor.
-  const { isMobile } = useDevice(); // Mobil durumunu buradan alıyoruz
+  const { isMobile } = useDevice();
 
-  const totalFrames = 135;
-  const imagePath = (frame) =>
-    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result.webp`;
-
-
-  const [preloadedImageSequenceImages, setPreloadedImageSequenceImages] = useState(Array(totalFrames).fill(null));
-  // isMobileDetected state'i artık gerekli değil, isMobile doğrudan kullanılıyor.
-  // const [isMobileDetected, setIsMobileDetected] = useState(false);
+  // --- ImageSequence için resim yükleme mantığı kaldırıldı ---
+  // const totalFrames = 135;
+  // const imagePath = (frame) => ...
+  // const [preloadedImageSequenceImages, setPreloadedImageSequenceImages] = useState(...);
+  // --- Resim yükleme mantığı sonu ---
 
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
-
   const mainVideoRef = useRef(null);
   const introSectionMainRef = useRef(null);
-
-  // handleMobileStatusChange callback'i AppContent'e taşındığı için gerek kalmadı.
-  // const handleMobileStatusChange = (status) => {
-  //   setIsMobileDetected(status);
-  // };
 
   const handleMainVideoReady = (videoElement) => {
     mainVideoRef.current = videoElement;
     if (mainVideoRef.current) {
-      // isMobileDetected yerine doğrudan isMobile kullanılıyor
       if (isMobile) {
           const playPromise = mainVideoRef.current.play();
           if (playPromise !== undefined) {
-              playPromise.then(() => {
-                  // Video başarıyla oynatılmaya başlandı
-              }).catch(error => {
+              playPromise.catch(error => {
                   console.warn("Mobilde video otomatik oynatılamadı, kullanıcı etkileşimi gerekebilir:", error);
               });
           }
@@ -111,95 +90,38 @@ function AppContent() {
     }
   };
 
+  // --- ImageSequence için resim yükleme useEffect'i kaldırıldı ---
+  // useEffect(() => {
+  //   const preloadImageSequenceAssets = async () => { ... };
+  //   preloadImageSequenceAssets();
+  // }, []);
+  // --- useEffect sonu ---
+
+
+  // Yükleme ekranı zamanlayıcısı
   useEffect(() => {
-    let isCancelled = false;
-    let loadedCount = 0;
-
-    const preloadImageSequenceAssets = async () => {
-      const tempImages = Array(totalFrames).fill(null);
-      const imageLoadPromises = [];
-
-      for (let i = 0; i < totalFrames; i++) {
-        if (isCancelled) return;
-
-        const img = new Image();
-        img.src = imagePath(i);
-
-        const loadPromise = new Promise((resolve, reject) => {
-          img.onload = () => {
-            if (!isCancelled) {
-              tempImages[i] = img;
-              loadedCount++;
-              resolve();
-            } else {
-              reject(new Error("Yükleme iptal edildi"));
-            }
-          };
-          img.onerror = (e) => {
-            console.error(`Resim yüklenirken hata: ${img.src}`, e);
-            if (!isCancelled) {
-               tempImages[i] = null;
-               loadedCount++;
-               resolve();
-            } else {
-               reject(new Error("Yükleme iptal edildi"));
-            }
-          };
-        });
-        imageLoadPromises.push(loadPromise);
-      }
-
-      await Promise.allSettled(imageLoadPromises);
-
-      if (!isCancelled) {
-        setPreloadedImageSequenceImages(tempImages);
-      }
-    };
-
-    preloadImageSequenceAssets();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
-
-  // Yükleme ekranı zamanlayıcısı: sadece mobil değilse çalışacak
-  useEffect(() => {
-    if (!isMobile) { // Sadece masaüstü ise 3 saniyelik zamanlayıcıyı başlat
+    if (!isMobile) {
         const timer = setTimeout(() => {
             setShowLoadingScreen(false);
         }, 3000);
         return () => clearTimeout(timer);
     } else {
-        // Mobil ise, yükleme ekranını hemen gizle (hiç gösterme)
         setShowLoadingScreen(false);
     }
-  }, [isMobile]); // isMobile bağımlılığı, mobil durum değiştiğinde (ilk tespit edildiğinde) tetikler
-  useEffect(() => {
-    // Google Analytics'i Ölçüm Kimliğiniz ile başlatın.
-    // 'G-XXXXXXXXXX' kısmını kendi kimliğinizle değiştirin.
-    ReactGA.initialize("G-1B088LTNTB"); 
+  }, [isMobile]);
 
-    // İlk sayfa görüntülemesini gönderin.
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname + window.location.search });
-
-    console.log("Google Analytics başlatıldı.");
-  }, []);
-  
+  // Google Analytics'i index.html'den eklediğiniz için bu useEffect'e gerek kalmadı.
+  // useEffect(() => {
+  //   ReactGA.initialize(...);
+  // }, []);
 
 
   return (
     <>
-      {/* Yükleme ekranı sadece showLoadingScreen true VE mobil değilse render edilecek */}
       {showLoadingScreen && !isMobile && <LoadingScreen />}
-
-      {/* Ana içerik, showLoadingScreen false olduğunda render edilecek.
-          Mobil ise, showLoadingScreen hemen false olacağı için MainContent anında görünür.
-          Masaüstü ise, 3 saniye sonra MainContent görünür. */}
       {!showLoadingScreen && (
         <MainContent
-          images={preloadedImageSequenceImages}
-          // onMobileStatusChange prop'u artık AppContent'ten gönderilmiyor
+          // images prop'u kaldırıldı
           onVideoReady={handleMainVideoReady}
           introSectionRef={introSectionMainRef}
         />
@@ -208,11 +130,11 @@ function AppContent() {
   );
 }
 
-// Orijinal App export'u şimdi DeviceProvider'ı sarıyor
+// Orijinal App export'u
 export default function App() {
   return (
     <DeviceProvider>
-      <AppContent /> {/* Tüm uygulama mantığı burada */}
+      <AppContent />
     </DeviceProvider>
   );
 }
