@@ -23,7 +23,7 @@ export default function Header() {
         </div>
         <div className="header-right">
           <div className="store-buttons-container">
-            <a href="https://apps.apple.com/tr/app/damage-ai-repair-assistant/id6746446379?l=tr" className="store-button" target="_blank" rel="noopener noreferrer">
+            <a href="https://apps.apple.com/app/damage-ai-repair-assistant/id6746446379" className="store-button" target="_blank" rel="noopener noreferrer">
               <img src="/images/app-store.svg" alt="App Store" />
               <span>App Store</span>
             </a>
