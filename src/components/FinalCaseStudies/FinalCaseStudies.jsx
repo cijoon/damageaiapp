@@ -1,5 +1,5 @@
 // DOSYA ADI: src/components/FinalCaseStudies/FinalCaseStudies.jsx
-// Sol sütun, sağ ile senkronize çalışan ayrı bloklar olarak yeniden düzenlendi.
+// Animasyon zamanlaması düzeltildi ve scroll ile bir sonraki bölüme geçiş özelliği eklendi.
 
 import React, { useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -21,11 +21,12 @@ export default function FinalCaseStudies() {
     target: firstImageTriggerRef,
     offset: ["start end", "end start"],
   });
-
-  // --- BU SATIRI SİLİYORUZ, ARTIK GEREKLİ DEĞİL ---
-  // const contentTranslateY = useTransform(mainScrollProgress, [0, 1], ["0%", "-66.66%"]);
   
-  const partDuration = 1 / slides.length;
+  const numSlides = slides.length;
+
+  // *** DEĞİŞİKLİK 1: Animasyon zamanlaması düzeltildi ***
+  // Animasyonların kaydırma alanının sonuna kadar sürmesi için (N-1)'e bölüyoruz.
+  const partDuration = 1 / (numSlides - 1);
 
   useEffect(() => {
     const blocks = document.querySelectorAll('.content-block');
@@ -40,10 +41,38 @@ export default function FinalCaseStudies() {
     return () => observer.disconnect();
   }, []);
 
-  // DOSYA ADI: src/components/FinalCaseStudies/FinalCaseStudies.jsx
-// Sadece `.content-column` içindeki map döngüsünü güncelleyin.
+  // *** DEĞİŞİKLİK 2: Scroll ile sonraki bölüme geçiş özelliği eklendi ***
+  const isScrollingDownRef = useRef(false); // Spam engellemek için
 
-// ... dosyanın üst kısımları aynı ...
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (event) => {
+      // Animasyonun tamamlandığını (progress >= 1) ve aşağı scroll edildiğini kontrol et
+      if (mainScrollProgress.get() >= 1 && event.deltaY > 0 && !isScrollingDownRef.current) {
+        isScrollingDownRef.current = true;
+        
+        // Bir sonraki bölümü bul ve ona smooth scroll yap
+        const nextSection = container.nextElementSibling;
+        if (nextSection) {
+          nextSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Bir sonraki scroll işlemi için 1.5 saniye bekle
+        setTimeout(() => {
+          isScrollingDownRef.current = false;
+        }, 1500);
+      }
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: true });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [mainScrollProgress]); // mainScrollProgress'i bağımlılığa ekliyoruz
+
 
   if (isMobile) {
     return (
@@ -69,31 +98,23 @@ export default function FinalCaseStudies() {
   return (
     <section ref={containerRef} className="scroll-container">
       <div className="sticky-container">
-
         <div className="content-column">
           {slides.map((slide, index) => {
-            // Her sol blok için kendi Y (dikey) pozisyonunu hesaplıyoruz
-            let y; // Değişkeni burada tanımlıyoruz
-
+            let y;
             if (index === 0) {
-              // BİRİNCİ BLOK: Sadece çıkış animasyonu yapar (Doğru, dokunmuyoruz).
               y = useTransform(mainScrollProgress, [0, partDuration], ["0%", "-100%"]);
-            } else if (index === slides.length - 1) {
-              // --- YENİ KURAL: EĞER SON BLOK İSE ---
-              // Sadece giriş animasyonu yapar ve ekranda kalır. Çıkış animasyonu olmaz.
+            } else if (index === numSlides - 1) {
               const start = (index - 1) * partDuration;
               const end = index * partDuration;
               y = useTransform(mainScrollProgress, [start, end], ["100%", "0%"]);
             } else {
-              // ORTADAKİ BLOK(LAR): Hem giriş hem çıkış animasyonu yapar (Doğru, dokunmuyoruz).
               const start = (index - 1) * partDuration;
               const end = index * partDuration;
               const exitEnd = (index + 1) * partDuration;
               y = useTransform(mainScrollProgress, [start, end, exitEnd], ["100%", "0%", "-100%"]);
             }
-
             return (
-              <motion.div key={slide.id} className="content-block" style={{ y, zIndex: slides.length - index }}>
+              <motion.div key={slide.id} className="content-block" style={{ y, zIndex: numSlides - index }}>
                 <h2>{slide.heading}</h2>
                 <small>{slide.sub}</small>
                 <div className="thumb-row">
@@ -105,11 +126,6 @@ export default function FinalCaseStudies() {
             );
           })}
         </div>
-       
-        {/* --- SOL SÜTUN DEĞİŞİKLİĞİ BİTİŞ --- */}
-
-
-        {/* --- SAĞ SÜTUN (DEĞİŞİKLİK YOK, AYNI KALIYOR) --- */}
         <div className="visuals-parent">
           <div ref={firstImageTriggerRef} className="first-image-trigger"></div>
           {slides.map((slide, index) => {
@@ -120,7 +136,6 @@ export default function FinalCaseStudies() {
                   <motion.div className="image-zoom-wrapper" style={{ scale }}>
                     <img src={slide.hero} alt={slide.heading} />
                   </motion.div>
-                  {/* View Article butonu kaldırıldı */}
                 </motion.div>
               );
             }
@@ -133,7 +148,6 @@ export default function FinalCaseStudies() {
                 <motion.div className="image-zoom-wrapper" style={{ scale }}>
                   <img src={slide.hero} alt={slide.heading} />
                 </motion.div>
-                {/* View Article butonu kaldırıldı */}
               </motion.div>
             );
           })}

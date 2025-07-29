@@ -6,7 +6,7 @@ import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
 import ImageSequenceSection from './components/ImageSequenceSection';
-
+import ReactGA from "react-ga4";
 // Diğer ağır bileşenleri lazy yüklüyoruz
 const LazyPhilosophySection = lazy(() => import('./components/PhilosophySection/PhilosophySection'));
 const LazyFinalCaseStudies = lazy(() => import('./components/FinalCaseStudies/FinalCaseStudies'));
@@ -175,6 +175,17 @@ function AppContent() {
         setShowLoadingScreen(false);
     }
   }, [isMobile]); // isMobile bağımlılığı, mobil durum değiştiğinde (ilk tespit edildiğinde) tetikler
+  useEffect(() => {
+    // Google Analytics'i Ölçüm Kimliğiniz ile başlatın.
+    // 'G-XXXXXXXXXX' kısmını kendi kimliğinizle değiştirin.
+    ReactGA.initialize("G-1B088LTNTB"); 
+
+    // İlk sayfa görüntülemesini gönderin.
+    ReactGA.send({ hitType: "pageview", page: window.location.pathname + window.location.search });
+
+    console.log("Google Analytics başlatıldı.");
+  }, []);
+  
 
 
   return (

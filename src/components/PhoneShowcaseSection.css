@@ -138,13 +138,19 @@
 .ps-animate .showcase-subtitle { animation-delay: 0.3s; }
 .ps-animate .showcase-description { animation-delay: 0.5s; }
 
+/* DOSYA ADI: src/components/PhoneShowcaseSection.css */
+
+/* ... dosyanın masaüstü stilleri burada ... */
+
 /* Mobil görünüm için eklenenler */
 @media (max-width: 768px) {
   .phone-mobile-section {
     display: flex;
     flex-direction: column;
     gap: 32px;
-    padding: 16px 0;
+    /* ÖNCEKİ HALİ: padding: 16px 0; */
+    /* YENİ HALİ: Üstten boşluk ekleyerek kırpılmayı düzeltiyoruz */
+    padding: 48px 0 16px 0; /* <<< DEĞİŞİKLİK BURADA */
     background: #181818;
   }
   .phone-mobile-block {
@@ -159,34 +165,46 @@
     padding-bottom: 16px;
     position: relative;
   }
+  /* ... Diğer mobil stilleriniz ... */
+
   .phone-mobile-mockup {
-    position: static !important;
-    width: 220px;
-    height: 320px;
+    position: relative; 
+    /* DEĞİŞİKLİK: Genişliği 240px'ten 300px'e çıkardık */
+    width: 300px;
+    
+    /* DEĞİŞİKLİK: Yüksekliği 360px'ten 480px'e çıkardık */
+    height: 480px;
+    
     margin: 20px auto 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
   }
+
   .phone-mobile-mockup-img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: auto;
-    display: block;
-    position: static !important;
+    height: 100%;
     z-index: 1;
   }
+
   .phone-mobile-screenshot {
-    position: static !important;
-    width: 188px;
-    height: 272px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    /* DEĞİŞİKLİK: Çerçeve büyüdüğü için kenar boşluğunu da biraz artırdık. */
+    /* 40px = her kenardan 20px'lik bir çerçeve boşluğu bırakır. */
+    width: calc(100% - 40px); 
+    height: calc(100% - 40px);
+
     object-fit: cover;
-    border-radius: 18px;
+    border-radius: 24px; /* Çerçeve büyüdüğü için köşe yuvarlaklığını da artırabiliriz */
     z-index: 2;
-    margin-left: -202px;
-    margin-top: 24px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
+
+  /* ... Diğer mobil stilleriniz ... */
   .phone-mobile-content {
     margin-top: 16px;
     color: #fff;
@@ -200,12 +218,11 @@
     margin-right: 12px;
     padding: 16px 12px;
   }
-  /* <<< BURAYI GÜNCELLEDİK: Mobil'de yazıların opaklığını sıfırlayan kuralı geçersiz kılın */
+
   .phone-mobile-content .showcase-title,
   .phone-mobile-content .showcase-subtitle,
   .phone-mobile-content .showcase-description {
-    opacity: 1; /* Mobil'de her zaman görünür olsun */
-    /* Aşağıdaki kurallar zaten mevcuttu, sadece mobil özel stil olarak bırakıyoruz */
+    opacity: 1;
     text-align: left;
   }
 
