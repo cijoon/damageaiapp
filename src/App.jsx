@@ -1,7 +1,7 @@
 // DOSYA ADI: src/App.jsx
 
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import LoadingScreen from './components/LoadingScreen/LoadingScreen.jsx';
+// import LoadingScreen from './components/LoadingScreen/LoadingScreen.jsx'; // LoadingScreen devre dışı bırakıldı
 
 import Header from './components/Header';
 import IntroSection from './components/IntroSection';
@@ -19,75 +19,62 @@ import { DeviceProvider, useDevice } from "./contexts/DeviceContext"; // DeviceP
 
 // MainContent bileşeni - artık dışarıda koşullu render etmiyoruz,
 // içindeki bileşenler kendi mobil render kararlarını verecek
+// MainContent bileşeni
 function MainContent({ images, onMobileStatusChange, onVideoReady, introSectionRef }) {
-  const { isMobile } = useDevice(); // useDevice burada güvenle kullanılabilir
+ const { isMobile } = useDevice();
 
-  useEffect(() => {
-    // isMobile değeri değiştiğinde veya bileşen ilk render edildiğinde App'e bildiriyoruz
-    if (onMobileStatusChange) {
-      onMobileStatusChange(isMobile);
-    }
-  }, [isMobile, onMobileStatusChange]);
+ useEffect(() => {
+   if (onMobileStatusChange) {
+     onMobileStatusChange(isMobile);
+   }
+ }, [isMobile, onMobileStatusChange]);
 
-  // Mobil ise intro video oynatma veya scroll etme gibi davranışlar burada kontrol edilebilir
-  // Örneğin, mobil ise intro videoyu farklı başlatabilirsiniz.
+ return (
+   <>
+     <Header />
+     <main>
+       <IntroSection onVideoReady={onVideoReady} ref={introSectionRef} />
 
-  return (
-    <>
-      <Header />
-      <main>
-        <IntroSection onVideoReady={onVideoReady} ref={introSectionRef} />
-        {/* ImageSequenceSection sadece mobil değilse render edilecek */}
-        {!isMobile && <ImageSequenceSection images={images} />} {/* App'den gelen images'i kullanıyor */}
+       {!isMobile && (
+         <Suspense fallback={<div>Loading philosophy...</div>}>
+           <LazyPhilosophySection />
+         </Suspense>
+       )}
 
-        {/* Diğer bölümler için Lazy Loading ve Suspense */}
-        <Suspense fallback={<div>Loading content...</div>}>
-          <LazyFinalCaseStudies />
-        </Suspense>
+       <Suspense fallback={<div>Loading content...</div>}>
+         <LazyFinalCaseStudies />
+       </Suspense>
 
-        {!isMobile && ( // PhilosophySection da mobilde gizli kalmaya devam ediyor
-          <Suspense fallback={<div>Loading philosophy...</div>}>
-            <LazyPhilosophySection />
-          </Suspense>
-        )}
+       {/* ImageSequenceSection burada */}
+       {!isMobile && <ImageSequenceSection images={images} />}
 
-        <Suspense fallback={<div>Loading showcase...</div>}>
-          <LazyPhoneShowcaseSection />
-        </Suspense>
+       <Suspense fallback={<div>Loading showcase...</div>}>
+         <LazyPhoneShowcaseSection />
+       </Suspense>
 
-        <Suspense fallback={<div>Loading experiments...</div>}>
-          <LazyExperimentsSection />
-        </Suspense>
+       <Suspense fallback={<div>Loading experiments...</div>}>
+         <LazyExperimentsSection />
+       </Suspense>
 
-        <Suspense fallback={<div>Loading footer...</div>}>
-          <LazyFooter />
-        </Suspense>
-      </main>
-    </>
-  );
+       <Suspense fallback={<div>Loading footer...</div>}>
+         <LazyFooter />
+       </Suspense>
+     </main>
+   </>
+ );
 }
 
 
 export default function App() {
   const totalFrames = 135;
-  // Burası güncellendi: "Pre-comp 1_00127_result.webp" formatına uygun olarak ayarlandı.
-  // Not: `frame` değişkeni 0'dan başladığı için dosya adlandırmanızda 1'den başlıyorsa
-  // `frame + 1` kullanmanız gerekebilir. Mevcut `String(frame).padStart(5, '0')` 
-  // 00000, 00001, ... olarak çıktı verir. Eğer sizin dosya adınız 00001 ile başlıyorsa
-  // ve frame 0'dan başlıyorsa, buna dikkat edin.
-  // Eğer After Effects çıktınız "Pre-comp 1_00001.webp" formatındaysa ve `frame` 0'dan başlıyorsa,
-  // String(frame + 1).padStart(5, '0') kullanmak daha doğru olacaktır.
-  // Mevcut dosya adlandırmanıza göre "Pre-comp 1_00127_result.webp" sadece tek bir dosya gibi duruyor,
-  // eğer bir seri ise "Pre-comp 1_00XXX_result.webp" şeklinde olmalıydı.
-  // Ben, eğer her kare için _result.webp suffix'i ekleniyorsa aşağıdaki gibi ayarladım.
   const imagePath = (frame) =>
     `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result.webp`;
 
 
   const [preloadedImageSequenceImages, setPreloadedImageSequenceImages] = useState(Array(totalFrames).fill(null));
-  const [imageSequenceLoadProgress, setImageSequenceLoadProgress] = useState(0);
+  // const [imageSequenceLoadProgress, setImageSequenceLoadProgress] = useState(0); // Loading screen kalktığı için progress tutmaya gerek yok
 
-  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  // const [showLoadingScreen, setShowLoadingScreen] = useState(true); // Loading screen kalktığı için kaldırıldı
   const [isMobileDetected, setIsMobileDetected] = useState(false); // Mobile algılama state'i
 
   const mainVideoRef = useRef(null);
@@ -100,21 +87,31 @@ export default function App() {
   const handleMainVideoReady = (videoElement) => {
     mainVideoRef.current = videoElement;
     if (mainVideoRef.current) {
-      mainVideoRef.current.pause();
-      mainVideoRef.current.currentTime = 0;
+      // Mobilde video anında oynatılabilir olmalı, otomatik oynatma denemesi
+      // Masaüstünde ise hala intro video manuel kontrol edilebilir.
+      if (isMobileDetected) {
+          const playPromise = mainVideoRef.current.play();
+          if (playPromise !== undefined) {
+              playPromise.then(() => {
+                  // Video başarıyla oynatılmaya başlandı
+              }).catch(error => {
+                  // Otomatik oynatma engellendi, kullanıcı etkileşimi gerekebilir
+                  console.warn("Mobilde video otomatik oynatılamadı, kullanıcı etkileşimi gerekebilir:", error);
+              });
+          }
+      } else {
+        mainVideoRef.current.pause();
+        mainVideoRef.current.currentTime = 0;
+      }
     }
   };
 
   useEffect(() => {
-    // Eğer mobil bir cihazdaysak, preload işlemine ve loading ekranına gerek yok.
-    // Mobil durum App ilk render edildiğinde handleMobileStatusChange tarafından set ediliyor.
-    // Bu useEffect, isMobileDetected değiştiğinde tetikleniyor.
-    if (isMobileDetected) {
-      setShowLoadingScreen(false); // Mobilde loading ekranını kapat
-      return; // Preload işlemine devam etme
-    }
+    // Mobil veya masaüstü fark etmeksizin, ImageSequenceSection resimlerini arkada yükle.
+    // Artık loading ekranı olmadığı için, bu yükleme işlemi tamamen arkaplanda olacak.
+    // Yalnızca isMobileDetected false (masaüstü) ise ImageSequenceSection render edilecek,
+    // ancak preload işlemi her zaman başlatılabilir.
 
-    // Mobil değilsek (masaüstü), preload işlemini başlat.
     let isCancelled = false;
     let loadedCount = 0;
 
@@ -133,7 +130,7 @@ export default function App() {
             if (!isCancelled) {
               tempImages[i] = img;
               loadedCount++;
-              setImageSequenceLoadProgress(Math.floor((loadedCount / totalFrames) * 100));
+              // setImageSequenceLoadProgress(Math.floor((loadedCount / totalFrames) * 100)); // Loading screen yok
               resolve();
             } else {
               reject(new Error("Yükleme iptal edildi"));
@@ -144,7 +141,7 @@ export default function App() {
             if (!isCancelled) {
                tempImages[i] = null;
                loadedCount++;
-               setImageSequenceLoadProgress(Math.floor((loadedCount / totalFrames) * 100));
+               // setImageSequenceLoadProgress(Math.floor((loadedCount / totalFrames) * 100)); // Loading screen yok
                resolve();
             } else {
                reject(new Error("Yükleme iptal edildi"));
@@ -158,57 +155,34 @@ export default function App() {
 
       if (!isCancelled) {
         setPreloadedImageSequenceImages(tempImages);
-        // Tüm resimler yüklendiğinde loading ekranını kapat.
-        setShowLoadingScreen(false);
+        // setShowLoadingScreen(false); // Loading screen yok
       }
     };
 
-    // Mobil değilsek preload işlemini başlat
+    // Siteye girildiğinde preload işlemini başlat (mobil olup olmadığına bakılmaksızın)
+    // Ancak App'teki isMobileDetected state'ini useEffect bağımlılıklarına eklemeyelim,
+    // çünkü preload'un sadece bir kez başlamasını istiyoruz.
     preloadImageSequenceAssets();
 
     return () => {
       isCancelled = true;
     };
-  }, [isMobileDetected]); // isMobileDetected değiştiğinde tekrar çalışır
+  }, []); // Bağımlılık dizisi boş, bu useEffect sadece bir kez çalışacak.
 
-  const handleLoadingScreenComplete = () => {
-    // Bu fonksiyon, LoadingScreen'ın progress'i 100 olduğunda çağrılıyor.
-    // showLoadingScreen zaten preload işlemi bittiğinde false oluyor.
-
-    // Ana videoyu baştan başlat ve oynat
-    if (mainVideoRef.current) {
-      mainVideoRef.current.currentTime = 0;
-      const playPromise = mainVideoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {}).catch(error => {
-          console.error("Video oynatılamadı:", error);
-        });
-      }
-    }
-
-    // IntroSection'a kaydır
-    setTimeout(() => {
-      if (introSectionMainRef.current) {
-        introSectionMainRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
-  };
+  // handleLoadingScreenComplete artık loading screen olmadığı için gereksiz.
+  // Onun yerine, video hazır olduğunda veya mobilse otomatik oynatma mantığı handleMainVideoReady'ye taşındı.
 
   return (
     <DeviceProvider>
-      {/* LoadingScreen'i sadece mobil değilse VE hala gösterilmesi gerekiyorsa render et */}
-      {!isMobileDetected && showLoadingScreen && (
+      {/* LoadingScreen tamamen kaldırıldı */}
+      {/* {!isMobileDetected && showLoadingScreen && (
         <LoadingScreen
           onLoadingComplete={handleLoadingScreenComplete}
           progress={imageSequenceLoadProgress}
         />
-      )}
+      )} */}
 
-      {/* MainContent her zaman render ediliyor, içindeki mantık sayesinde
-          mobil cihazlarda ImageSequenceSection gibi bileşenler gizleniyor.
-          Ancak, loading ekranı bitene kadar veya mobil değilse opacity gibi CSS ile gizleyebilirsiniz.
-          Şu anki haliyle, mobil ise direkt görünür.
-      */}
+      {/* MainContent her zaman render ediliyor */}
       <MainContent
         images={preloadedImageSequenceImages}
         onMobileStatusChange={handleMobileStatusChange}
