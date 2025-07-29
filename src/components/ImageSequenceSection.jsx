@@ -14,6 +14,17 @@ export default function ImageSequenceSection({ images }) {
   // *** YENİ: Başlangıç çiziminin yapılıp yapılmadığını takip etmek için useRef ***
   const initialDrawDoneRef = useRef(false);
 
+  // *** YENİ: Kaydırma hassasiyetini kontrol etmek için yeni bir useRef ***
+  // Bu değer ne kadar yüksekse, animasyon o kadar yavaşlar (her kare için daha fazla kaydırma gerekir).
+  const scrollSensitivityRef = useRef(15); // Her 15 piksel kaydırmada bir kare ilerle
+
+  // *** YENİ: Toplam kaydırma miktarını takip etmek için useRef ***
+  const currentScrollAmountRef = useRef(0);
+
+  // *** YENİ: Animasyonun sonuna gelindiğinde dışarı kaydırmak için ek eşik ***
+  const exitScrollThresholdRef = useRef(50); // Animasyon bitince 50 piksel daha kaydırılırsa serbest bırak
+
+
   const totalFrames = images.length;
 
   const textTriggers = [
@@ -44,6 +55,7 @@ export default function ImageSequenceSection({ images }) {
     // Bu useEffect'in bağımlılıkları arasına images'ı koyduk ki, App.jsx'ten gelen ilk görseller yüklendiğinde tetiklensin.
   }, [images]); // images'ın ilk kez dolu gelmesiyle veya değişmesiyle tetiklenir
 
+
   // Scroll dinleyicisi ile kare geçişi ve metin güncellemeleri
   useEffect(() => {
     const section = sectionRef.current;
@@ -52,21 +64,57 @@ export default function ImageSequenceSection({ images }) {
     const handleWheel = (event) => {
       let currentFrame = frameIndexRef.current;
       let frameChanged = false;
+      let preventDefaultScroll = true; // Varsayılan olarak kaydırmayı engelle
 
-      // Kaydırma yönüne göre kareyi güncelle
-      if (event.deltaY > 0 && currentFrame < totalFrames - 1) { // İleriye kaydırma
-        event.preventDefault();
-        currentFrame++;
-        frameChanged = true;
-      } else if (event.deltaY < 0 && currentFrame > 0) { // Geriye kaydırma
-        event.preventDefault();
-        currentFrame--;
-        frameChanged = true;
+      // Kaydırma miktarını biriktir
+      currentScrollAmountRef.current += event.deltaY;
+
+      // İleriye kaydırma
+      if (event.deltaY > 0) {
+        if (currentFrame < totalFrames - 1) {
+          // Animasyon devam ederken
+          if (currentScrollAmountRef.current >= scrollSensitivityRef.current) {
+            currentFrame++;
+            frameChanged = true;
+            currentScrollAmountRef.current = 0; // Eşiği geçince sıfırla
+          }
+        } else {
+          // Animasyon son kareye ulaştı, şimdi dışarı kaydırmaya izin ver
+          if (currentScrollAmountRef.current >= exitScrollThresholdRef.current) {
+            preventDefaultScroll = false; // Kaydırmayı serbest bırak
+            currentScrollAmountRef.current = exitScrollThresholdRef.current; // Negatif birikmemesi için
+          } else {
+            preventDefaultScroll = true; // Henüz eşiği geçmediyse hala engelle
+          }
+        }
+      } 
+      // Geriye kaydırma
+      else if (event.deltaY < 0) {
+        if (currentFrame > 0) {
+          // Animasyon devam ederken
+          if (currentScrollAmountRef.current <= -scrollSensitivityRef.current) {
+            currentFrame--;
+            frameChanged = true;
+            currentScrollAmountRef.current = 0; // Eşiği geçince sıfırla
+          }
+        } else {
+          // Animasyon ilk kareye ulaştı, şimdi dışarı kaydırmaya izin ver
+          if (currentScrollAmountRef.current <= -exitScrollThresholdRef.current) {
+            preventDefaultScroll = false; // Kaydırmayı serbest bırak
+            currentScrollAmountRef.current = -exitScrollThresholdRef.current; // Pozitif birikmemesi için
+          } else {
+            preventDefaultScroll = true; // Henüz eşiği geçmediyse hala engelle
+          }
+        }
       }
+
+      if (preventDefaultScroll) {
+        event.preventDefault(); // Sadece gerekli olduğunda default'u engelle
+      }
+
 
       if (frameChanged) {
         frameIndexRef.current = currentFrame;
-        // Scroll ile değişen kareyi çiz. drawFrame kendi içinde resmin yüklü olup olmadığını kontrol eder.
         drawFrame(currentFrame);
 
         let newFullText = "";

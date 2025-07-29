@@ -70,8 +70,19 @@ function MainContent({ images, onMobileStatusChange, onVideoReady, introSectionR
 
 export default function App() {
   const totalFrames = 135;
+  // Burası güncellendi: "Pre-comp 1_00127_result.webp" formatına uygun olarak ayarlandı.
+  // Not: `frame` değişkeni 0'dan başladığı için dosya adlandırmanızda 1'den başlıyorsa
+  // `frame + 1` kullanmanız gerekebilir. Mevcut `String(frame).padStart(5, '0')` 
+  // 00000, 00001, ... olarak çıktı verir. Eğer sizin dosya adınız 00001 ile başlıyorsa
+  // ve frame 0'dan başlıyorsa, buna dikkat edin.
+  // Eğer After Effects çıktınız "Pre-comp 1_00001.webp" formatındaysa ve `frame` 0'dan başlıyorsa,
+  // String(frame + 1).padStart(5, '0') kullanmak daha doğru olacaktır.
+  // Mevcut dosya adlandırmanıza göre "Pre-comp 1_00127_result.webp" sadece tek bir dosya gibi duruyor,
+  // eğer bir seri ise "Pre-comp 1_00XXX_result.webp" şeklinde olmalıydı.
+  // Ben, eğer her kare için _result.webp suffix'i ekleniyorsa aşağıdaki gibi ayarladım.
   const imagePath = (frame) =>
-    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}.webp`;
+    `/catlak-animasyon/Pre-comp 1_${String(frame).padStart(5, '0')}_result.webp`;
+
 
   const [preloadedImageSequenceImages, setPreloadedImageSequenceImages] = useState(Array(totalFrames).fill(null));
   const [imageSequenceLoadProgress, setImageSequenceLoadProgress] = useState(0);
@@ -196,8 +207,7 @@ export default function App() {
       {/* MainContent her zaman render ediliyor, içindeki mantık sayesinde
           mobil cihazlarda ImageSequenceSection gibi bileşenler gizleniyor.
           Ancak, loading ekranı bitene kadar veya mobil değilse opacity gibi CSS ile gizleyebilirsiniz.
-          Şu anki haliyle, mobil değilse ve loading bitmediyse MainContent görünür ama loading ekranı üstünde.
-          Mobil ise direkt görünür.
+          Şu anki haliyle, mobil ise direkt görünür.
       */}
       <MainContent
         images={preloadedImageSequenceImages}
