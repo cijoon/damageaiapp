@@ -2,6 +2,8 @@
 // Ortadaki logo kaldırıldı ve video kontrolleri eklendi.
 
 import React, { useState, useRef } from 'react';
+import Lottie from 'lottie-react'; // Lottie kütüphanesini içe aktar
+import scrollDownAnimation from '../assets/scroll_down.json';
 import './IntroSection.css';
 
 export default function IntroSection() {
@@ -71,6 +73,10 @@ export default function IntroSection() {
           <button onClick={handleMuteToggle} className="control-button">
             {isMuted ? 'Unmute' : 'Mute'}
           </button>
+        </div>
+      {/* --- YENİ EKLENEN KISIM: LOTTIE ANIMASYONU --- */}
+        <div className="scroll-down-animation">
+          <Lottie animationData={scrollDownAnimation} loop={true} />
         </div>
       </div>
     </section>

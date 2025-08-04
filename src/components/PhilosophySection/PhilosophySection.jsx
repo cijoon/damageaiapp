@@ -10,24 +10,45 @@ export default function PhilosophySection() {
     offset: ["start end", "end start"]
   });
 
-  // DEĞİŞİKLİK 1: "we" kelimesinin hareket hızı artırıldı.
-  // Hareket aralığı genişletildi, bu da aynı scroll mesafesinde daha hızlı hareket etmesini sağlar.
   const weTranslateY = useTransform(scrollYProgress, [0, 1], ["-250%", "350%"]);
 
   return (
     <section ref={sectionRef} className="philosophy-section">
+      <div className="try-free-container">
+        <img 
+          src="/tryfree.svg" 
+          alt="Try Free" 
+          className="try-free-svg" 
+        />
+        <p className="try-free-text">Scan & Free Trial</p>
+      </div>
+     
+      {/* --- SINIF İSİMLERİ ÇAKIŞMAYI ÖNLEMEK İÇİN DEĞİŞTİRİLDİ --- */}
+      <div className="philosophy-store-container">
+        <div className="philosophy-store-wrapper">
+          <a href="https://apps.apple.com/app/damage-ai-repair-assistant/id6746446379" target="_blank" rel="noopener noreferrer">
+            <img src="/images/app-store.svg" alt="Download on the App Store" className="philosophy-store-img" />
+          </a>
+          <div className="philosophy-store-label">App Store</div>
+        </div>
+        <div className="philosophy-store-wrapper">
+          <a href="https://play.google.com/store/apps/details?id=com.zanugbisr.damagedetector" target="_blank" rel="noopener noreferrer">
+            <img src="/images/play-store.svg" alt="Get it on Google Play" className="philosophy-store-img" />
+          </a>
+          <div className="philosophy-store-label">Play Store</div>
+        </div>
+      </div>
+      
       <div className="heading-container">
         <h2 className="main-heading">
-          {/* DEĞİŞİKLİK 2: "we" kelimesi metin akışından çıkarıldı */}
-          stay curious, always with
+          Boost Your Shop with
           <br />
-                   collaborate with
+                   Be Found First with
           <br />
-                nurture talent with
+                Find Customer with
           <br />
-         design for the future with
+         Earn more with
         </h2>
-        {/* "we" kelimesi artık burada, diğerlerinden bağımsız olarak konumlanacak */}
         <motion.h2 
           className="we-word-overlay"
           style={{ y: weTranslateY }}

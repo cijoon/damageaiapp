@@ -1,6 +1,6 @@
 // DOSYA ADI: src/components/ImageSequenceSection.jsx
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react'; 
 import './ImageSequenceSection.css';
 
 export default function ImageSequenceSection({ images }) {

@@ -133,3 +133,23 @@
   color: #ffcdd2;
   word-break: break-all;
 }
+/* DOSYA ADI: src/components/IntroSection.css */
+/* ... mevcut kodlar ... */
+
+/* Aşağı kaydırma Lottie animasyonunun stilleri */
+.scroll-down-animation {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  width: 150px; /* Animasyonun boyutunu ayarlayabilirsiniz */
+  height: 150px; /* Animasyonun boyutunu ayarlayabilirsiniz */
+  z-index: 10;
+}
+
+/* Telefonlar için duyarlı tasarım */
+@media (max-width: 768px) {
+  .scroll-down-animation {
+    width: 40px;
+    height: 40px;
+  }
+}

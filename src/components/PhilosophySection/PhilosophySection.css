@@ -25,11 +25,65 @@
   
   /* 5. (Öneri) Sayfa kaydıkça resmin sabit kalması için */
   background-attachment: fixed;
+  position: relative;
 }
+
+.try-free-svg {
+  position: absolute; /* Ana kapsayıcıya göre konumlanır */
+  top: 150px;       /* Yukarıdan boşluk (padding-top ile aynı) */
+  left: 200px;        /* Soldan boşluk */
+  width: 300px;      /* Genişlik (İsteğe bağlı olarak değiştirilebilir) */
+  height: auto;      /* Oranı korumak için otomatik yükseklik */
+}
+/* SVG'nin altındaki 'try free' yazısı */
+.try-free-text {
+  color: #33413a; /* İstenen renk kodu */
+  margin-top: 8px;  /* SVG ile arasında boşluk bırakır */
+  font-weight: bold;/* Yazıyı kalın yapar */
+  font-size: 4rem;/* Yazı boyutu */
+  left: -55.33%;
+  transform: translate(120px, 300px); 
+  gap: 0px
+  
+}
+.philosophy-store-container {
+  position: absolute;
+  top: 545px; 
+  left: 200px;
+  width: 300px;
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.philosophy-store-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.philosophy-store-img {
+  height: 50px;
+  width: auto;
+  transition: opacity 0.3s ease;
+}
+
+.philosophy-store-img:hover {
+  opacity: 0.85;
+}
+
+.philosophy-store-label {
+  color: #3a4a41;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
 
 .heading-container {
   position: relative;
   margin-bottom: 200px;
+  padding-top: -100;
 }
 
 .main-heading {
@@ -39,7 +93,7 @@
   margin: 0;
   letter-spacing: -2px;
   text-align: right;
-  padding-right: 30%; /* Optional: tweak for your preferred offset */
+  padding-right: 7%; /* Optional: tweak for your preferred offset */
 }
 
 
@@ -49,7 +103,7 @@
      negatif translateY'ini (-100%) tam olarak dengelemek için güncellendi.
      Bu, kelimenin dikey olarak 1. satır hizasında başlamasını sağlar. */
   top: 1.4em; 
-  left: 33.33%;
+  left: 55.33%;
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 300;
   line-height: 1.1;
