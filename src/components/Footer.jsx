@@ -19,7 +19,7 @@ export default function Footer() {
 
           <div className="footer-item">
             <img src="/email-icon.png" alt="Email Icon" />
-            <a href="mailto:hello@damageai.com">hello@damageai.com</a>
+            <a href="mailto:hello@damageai.com">hello@damageaiapp.com</a>
           </div>
         </div>
 
