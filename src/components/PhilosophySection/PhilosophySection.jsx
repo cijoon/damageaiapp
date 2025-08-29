@@ -16,7 +16,7 @@ export default function PhilosophySection() {
     <section ref={sectionRef} className="philosophy-section">
       <div className="try-free-container">
         <img 
-          src="/tryfree.svg" 
+          src="/My_App.png" 
           alt="Try Free" 
           className="try-free-svg" 
         />
